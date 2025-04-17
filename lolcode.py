@@ -1,6 +1,8 @@
 import sys
 from lexer.lolcode_lexer import *
 from parser.lolcode_parser import *
+from interpreter.lolcode_interpreter import *
+from interpreter.values import *
 
 global_symbol_table = SymbolTable()
 global_symbol_table.set("IT", Number(0))
