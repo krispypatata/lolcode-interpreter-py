@@ -1,11 +1,11 @@
 from lexer.lolcode_lexer import *
+from parser.nodes import *
 from .runtime import *
 from .values import *
-from parser.nodes import *
 
-#######################################
+# ═════════════════════════════════════════════════════════════════════════════════════════════════
 # INTERPRETER
-#######################################
+# ═════════════════════════════════════════════════════════════════════════════════════════════════
 class Interpreter:
   def visit(self, node, context):
     method_name = f'visit_{type(node).__name__}'
