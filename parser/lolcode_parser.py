@@ -1,4 +1,4 @@
-from lexer import *
+from lexer.lolcode_lexer import *
 
 # ═════════════════════════════════════════════════════════════════════════════════════════════════
 class Error:
