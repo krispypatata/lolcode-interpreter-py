@@ -1,6 +1,5 @@
 import re
 from .runtime import *
-from .lolcode_interpreter import *
 
 # ═════════════════════════════════════════════════════════════════════════════════════════════════
 # VALUES
@@ -409,7 +408,8 @@ class Function(Value):
     super().__init__()
 
   def execute(self, passed_parameters):
-    
+    from .lolcode_interpreter import Interpreter
+
     res = RTResult()
     interpreter = Interpreter()
     new_context = Context(self.function_name, parent=self.context)
