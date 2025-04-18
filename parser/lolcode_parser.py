@@ -9,13 +9,8 @@ class ParseResult:
   def __init__(self):
     self.error = None
     self.node = None
-    self.advance_count = 0
-
-  def register_advancement(self):
-    self.advance_count += 1
 
   def register(self, res):
-    self.advance_count += res.advance_count
     if res.error: self.error = res.error
     return res.node
 
@@ -49,13 +44,11 @@ class Parser:
     if (self.current_token[TOKEN_TAG] != HAI):
       return res.failure(InvalidSyntaxError(self.current_token, "Expected a 'HAI' Keyword!"))
 
-    res.register_advancement() # Eat HAI
-    self.advance()
+    self.advance() # Eat HAI
 
     # Check if there's a variable section
     if self.current_token[TOKEN_TAG] == WAZZUP:
-      res.register_advancement()  # Eat Wazzup
-      self.advance()
+      self.advance() # Eat Wazzup
 
       variable_declaration_section =  res.register(self.variable_section())
       if variable_declaration_section is None: return res   # Check if there's an error
@@ -87,8 +80,7 @@ class Parser:
       return res.failure(InvalidSyntaxError(self.current_token, "Expected a 'BUHBYE' or keyword!"))
     
     # No error
-    res.register_advancement()  # Eat BUHBYE
-    self.advance()
+    self.advance() # Eat BUHBYE
 
     return res.success(VarDecListNode(variable_declarations))
 
@@ -96,20 +88,17 @@ class Parser:
     res = ParseResult()
 
     if self.current_token[TOKEN_TAG] == I_HAS_A:
-      res.register_advancement()
       self.advance() # eats I has a
 
       if (self.current_token[TOKEN_TAG] != IDENTIFIER):
         return res.failure(InvalidSyntaxError(self.current_token, "Expected Identifier!"))
 
       var_name_token = self.current_token
-      res.register_advancement()
       self.advance() # eats var name
       
       if (self.current_token[TOKEN_TAG] != ITZ):
         return res.success(VarDeclarationNode(var_name_token, NoobNode()))
 
-      res.register_advancement()
       self.advance() # eats ITZ
 
       expression = res.register(self.expression())
@@ -124,8 +113,7 @@ class Parser:
     token = self.current_token
 
     if token[TOKEN_TAG] == IDENTIFIER:
-      res.register_advancement() # Eat
-      self.advance()
+      self.advance() # Eat
 
       return res.success(VarAccessNode(token))
 
@@ -238,8 +226,7 @@ class Parser:
     token = self.current_token
 
     if token[TOKEN_TAG] == NOOB:
-      res.register_advancement()  # Eat NOOB
-      self.advance()
+      self.advance() # Eat NOOB
 
       return res.success(NoobNode(token[TOKEN_LINE_NUMBER]))
 
@@ -249,8 +236,7 @@ class Parser:
     operands = []
 
     if self.current_token[TOKEN_TAG] == SMOOSH:
-      res.register_advancement()  # Eat SMOOSH
-      self.advance()
+      self.advance() # Eat SMOOSH
 
       # Parse the first operand
       first_operand = res.register(self.expression())
@@ -258,8 +244,7 @@ class Parser:
       operands.append(first_operand)  # Add to list
 
       while (self.current_token[TOKEN_TAG] == AN):
-        res.register_advancement() # Eat 'AN'
-        self.advance()
+        self.advance() # Eat 'AN'
 
         additional_operand = res.register(self.expression())
         
@@ -276,8 +261,7 @@ class Parser:
     token = self.current_token
 
     if token[TOKEN_TAG] == YARN:
-      res.register_advancement() # Eat
-      self.advance()
+      self.advance() # Eat
 
       return res.success(StringNode(token))
 
@@ -289,8 +273,8 @@ class Parser:
     
     # if self.current_token[TOKEN_TAG] in (PRODUKT_OF, QUOSHUNT_OF, SUM_OF, DIFF_OF, BIGGR_OF, SMALLR_OF):
     operation = self.current_token
-    res.register_advancement()
-    self.advance()
+    
+    self.advance() # Eath
     
     # Parse the left operand
     left = res.register(self.arithmetic_expression())  # Recursive call to handle the left side
@@ -302,7 +286,6 @@ class Parser:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected an 'AN' keyword!"))
         
     # Advance past the 'AN' keyword
-    res.register_advancement()
     self.advance()
 
     # Parse the right operand which may also be an expression
@@ -329,7 +312,6 @@ class Parser:
     token = self.current_token
 
     if token[TOKEN_TAG] in (NUMBR, NUMBAR):
-      res.register_advancement()
       self.advance()
       
       if token[TOKEN_TAG] == NUMBR:
@@ -360,8 +342,7 @@ class Parser:
 
     if self.current_token[TOKEN_TAG] in (ALL_OF, ANY_OF):
       operation = self.current_token
-      res.register_advancement() # Eat
-      self.advance()
+      self.advance() # Eat
 
       # Parse the first operand
       first_operand = res.register(self.boolean_expression())
@@ -369,8 +350,7 @@ class Parser:
       boolean_statements.append(first_operand) # Add to list
 
       while (self.current_token[TOKEN_TAG] == AN):
-        res.register_advancement() # Eat 'AN'
-        self.advance()
+        self.advance() # Eat 'AN'
 
         additional_operand = res.register(self.boolean_expression())
         
@@ -384,7 +364,6 @@ class Parser:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected an 'MKAY' keyword!"))
       
       # If there's 'MKAY', eat it
-      res.register_advancement()
       self.advance()
 
       return res.success(BooleanTernaryOpNode(operation, boolean_statements))
@@ -394,9 +373,10 @@ class Parser:
 
     if self.current_token[TOKEN_TAG] in (BOTH_OF, EITHER_OF, WON_OF):
       operation = self.current_token
-      res.register_advancement() # Eat
-      self.advance()
-      print(operation)
+      self.advance()  # Eat
+      
+      # print(operation)
+
       # Parse the left operand
       left = res.register(self.boolean_expression())
       if res.error: return res
@@ -406,7 +386,6 @@ class Parser:
           return res.failure(InvalidSyntaxError(self.current_token, "Expected an 'AN' keyword!"))
           
       # Advance past the 'AN' keyword
-      res.register_advancement()
       self.advance()
 
       # Parse the right operand
@@ -421,8 +400,7 @@ class Parser:
 
     if self.current_token[TOKEN_TAG] == NOT:
       operation = self.current_token
-      res.register_advancement() # Eat
-      self.advance()
+      self.advance() # Eat
 
       # Parse the operand
       operand = res.register(self.boolean_expression())
@@ -435,8 +413,7 @@ class Parser:
     token = self.current_token
 
     if token[TOKEN_TAG] in (TROOF):
-      res.register_advancement() # Eat
-      self.advance()
+      self.advance() # Eat
       
       return res.success(BooleanNode(token))
     
@@ -450,8 +427,7 @@ class Parser:
 
     if token[TOKEN_TAG] in (BOTH_SAEM, DIFFRINT):
       operation = self.current_token
-      res.register_advancement() # Eat
-      self.advance()
+      self.advance() # Eat
 
       # Parse the left operand
       left = res.register(self.expression())
@@ -462,7 +438,6 @@ class Parser:
           return res.failure(InvalidSyntaxError(self.current_token, "Expected an 'AN' keyword!"))
     
       # Advance past the 'AN' keyword
-      res.register_advancement()
       self.advance()
 
       # Parse the right operand
@@ -487,8 +462,7 @@ class Parser:
     operands = []
 
     if self.current_token[TOKEN_TAG] == VISIBLE:
-      res.register_advancement()  # Eat VISIBLE
-      self.advance()
+      self.advance() # Eat VISIBLE
 
       # Parse the first operand
       first_operand = res.register(self.expression())
@@ -496,8 +470,7 @@ class Parser:
       operands.append(first_operand)  # Add to list
 
       while (self.current_token[TOKEN_TAG] in (VISIBLE_OPERATOR, AN)):
-        res.register_advancement() # Eat '+'
-        self.advance()
+        self.advance() # Eat '+'
 
         additional_operand = res.register(self.expression())
         
@@ -516,8 +489,7 @@ class Parser:
     res = ParseResult()
 
     if self.current_token[TOKEN_TAG] == MAEK_A:
-      res.register_advancement()  # Eat MAEK A
-      self.advance()
+      self.advance() # Eat MAEK A
 
       # Parse the value to typecast
       source_value = res.register(self.expression()) # Don't know if var only so Ii set it to expression instead
@@ -529,8 +501,7 @@ class Parser:
       if self.current_token[TOKEN_VALUE] in ("NUMBAR", "NUMBR", "YARN", "TROOF"):
         desired_type = self.current_token[TOKEN_VALUE]
 
-        res.register_advancement()  # Desired type
-        self.advance()
+        self.advance() # Eat desired type
 
         return res.success(TypecastNode(source_value, desired_type))
       else:
@@ -545,8 +516,7 @@ class Parser:
     if self.current_token[TOKEN_TAG] == IDENTIFIER:
       var_to_access = self.current_token
 
-      res.register_advancement()  # Eat Variable Identifier
-      self.advance()
+      self.advance() # Eat Variable Identifier
 
       # Check for 'R' keyword 
       if self.current_token[TOKEN_TAG] not in (R, IS_NOW_A):
@@ -556,8 +526,7 @@ class Parser:
 
       # Else, continue
       if self.current_token[TOKEN_TAG] == R:
-        res.register_advancement()  # Eat R
-        self.advance()
+        self.advance() # Eat R
 
         value_to_assign = res.register(self.expression())
 
@@ -569,8 +538,7 @@ class Parser:
       
       # Var assignment with TYPECASTING
       elif self.current_token[TOKEN_TAG] == IS_NOW_A:
-        res.register_advancement()  # Eat IS NOW A
-        self.advance()
+        self.advance() # Eat IS NOW A
 
         if self.current_token[TOKEN_VALUE] not in ("NUMBAR", "NUMBR", "YARN", "TROOF"):
           return res.failure(InvalidSyntaxError(self.current_token, "Expected a type to cast the value!"))
@@ -578,8 +546,7 @@ class Parser:
         # Else, continue
         desired_type = self.current_token[TOKEN_VALUE]
 
-        res.register_advancement()  # Eat the desired type
-        self.advance()
+        self.advance() # Eat the desired type
 
         return res.success(VarAssignmentNode(var_to_access, TypecastNode(VarAccessNode(var_to_access), desired_type)))
 
@@ -591,8 +558,7 @@ class Parser:
     res = ParseResult()
 
     if self.current_token[TOKEN_TAG] == GIMMEH:
-      res.register_advancement() # Eat Gimmeh
-      self.advance()
+      self.advance() # Eat Gimmeh
 
       # Error
       if self.current_token[TOKEN_TAG] != IDENTIFIER:
@@ -616,8 +582,7 @@ class Parser:
 
     if self.current_token[TOKEN_TAG] == GTFO:
       break_token = self.current_token
-      res.register_advancement() # Eat GTFO
-      self.advance()
+      self.advance() # Eat GTFO
       
       return res.success(BreakNode(break_token))
 
@@ -629,15 +594,13 @@ class Parser:
     if_block_statements = []
     else_block_statements = []
     if self.current_token[TOKEN_TAG] == O_RLY:
-      res.register_advancement() # Eat O RLY?
-      self.advance()
+      self.advance() # Eat O RLY?
 
       # Error
       if self.current_token[TOKEN_TAG] != YA_RLY:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected an 'YA RLY' keyword!"))
 
-      res.register_advancement() # Eat YA RLY
-      self.advance()
+      self.advance() # Eat YA RLY
 
       while self.current_token[TOKEN_TAG] not in (NO_WAI, OIC, KTHXBYE):
         statement = res.register(self.statement())
@@ -652,16 +615,14 @@ class Parser:
       if self.current_token[TOKEN_TAG] != NO_WAI:
         # Check for OIC
         if self.current_token[TOKEN_TAG] == OIC:
-          res.register_advancement() # Eat OIC
-          self.advance()
+          self.advance() # Eat OIC
           return res.success(IfNode(if_block_statements, else_block_statements))
         
         # Error
         return res.failure(InvalidSyntaxError(self.current_token, "Expected a 'NO WAI' keyword!"))
-        
       
-      res.register_advancement() # Eat NO WAI
-      self.advance()
+      # Eat NO WAI
+      self.advance() 
 
       while self.current_token[TOKEN_TAG] not in (OIC, KTHXBYE):
         statement = res.register(self.statement())
@@ -676,7 +637,7 @@ class Parser:
       if self.current_token[TOKEN_TAG] != OIC:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected a 'NO WAI' keyword!"))
       
-      res.register_advancement() # Eat OIC
+      # Eat OIC
       self.advance()
       
       return res.success(IfNode(if_block_statements, else_block_statements))
@@ -692,7 +653,7 @@ class Parser:
     default_case_statements = []
 
     if self.current_token[TOKEN_TAG] == WTF:
-      res.register_advancement() # Eat WTF
+      # Eat WTF
       self.advance()
       
       # Error
@@ -702,7 +663,7 @@ class Parser:
       while self.current_token[TOKEN_TAG] == OMG:
         statements = []
 
-        res.register_advancement() # Eat OMG
+        # Eat OMG
         self.advance()
 
         # Error
@@ -734,10 +695,9 @@ class Parser:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected a default case for switch case!"))
 
       # Eat OMGWTF
-      res.register_advancement()
       self.advance()
 
-      # add switch case
+      # Add switch case
       while self.current_token[TOKEN_TAG] not in (OIC, KTHXBYE):
         statement = res.register(self.statement())
 
@@ -751,7 +711,6 @@ class Parser:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected an 'OIC' keyword!"))
 
       # Eat OIC
-      res.register_advancement()
       self.advance()
 
       return res.success(SwitchCaseNode(cases, cases_statements, default_case_statements))
@@ -768,14 +727,14 @@ class Parser:
     body_statements = []
 
     if self.current_token[TOKEN_TAG] == IM_IN_YR:
-      res.register_advancement() # Eat IM IN YR
+      # Eat IM IN YR
       self.advance()
 
       if self.current_token[TOKEN_TAG] != IDENTIFIER:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected a label for the loop!"))
       
       label = self.current_token[TOKEN_VALUE]
-      res.register_advancement() # Eat label
+      # Eat label
       self.advance()
 
 
@@ -784,14 +743,14 @@ class Parser:
       
       # Else, no error
       operation = self.current_token
-      res.register_advancement() # Eat UPPIN or NERFIN
+      # Eat UPPIN or NERFIN
       self.advance()
 
       if self.current_token[TOKEN_TAG] != YR:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected a 'YR' keyword for the loop!"))
       
       # Else, no error
-      res.register_advancement() # Eat YR
+      # Eat YR
       self.advance()
 
       # Var
@@ -804,13 +763,13 @@ class Parser:
       # if variable is None:
       #   return res    
       variable = self.current_token
-      res.register_advancement() # Eat variable
+      # Eat variable
       self.advance()
 
 
       # TIL/WILE
       if self.current_token[TOKEN_TAG] in (TIL, WILE):
-        res.register_advancement() # Eat TIL or WILE
+        # Eat TIL or WILE
         self.advance()
 
         til_wile_expression = res.register(self.expression())
@@ -834,7 +793,6 @@ class Parser:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected an 'IM OUTTA YR' keyword!"))
 
       # Eat IM OUTTA YR
-      res.register_advancement()
       self.advance()
 
       
@@ -842,7 +800,7 @@ class Parser:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected a label to exit the loop!"))
 
       out_label = self.current_token[TOKEN_VALUE]
-      res.register_advancement() # Eat label
+      # Eat label
       self.advance()
 
       print(label, out_label)
@@ -862,7 +820,7 @@ class Parser:
     body_statements = []
 
     if self.current_token[TOKEN_TAG] == HOW_IZ_I:
-      res.register_advancement() # Eat HOW IZ I
+      # Eat HOW IZ I
       self.advance()
 
       # Identifier
@@ -870,12 +828,12 @@ class Parser:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected a valid function name!"))
       
       function_name = self.current_token
-      res.register_advancement() # Eat function name
+      # Eat function name
       self.advance()
 
       # Check if there are parameters
       if self.current_token[TOKEN_TAG] == YR:
-        res.register_advancement() # Eat YR
+        # Eat YR
         self.advance()
 
         first_param = res.register(self.expression())
@@ -885,7 +843,7 @@ class Parser:
 
         # Check for other params if there are any
         while self.current_token[TOKEN_TAG] == AN_YR:
-          res.register_advancement() # Eat AN YR
+          # Eat AN YR
           self.advance()
 
           additional_param = res.register(self.expression())
@@ -901,7 +859,7 @@ class Parser:
         body_statements.append(statement)
 
       if self.current_token[TOKEN_TAG] == FOUND_YR:
-        res.register_advancement() # Eat FOUND YR
+        # Eat FOUND YR
         self.advance()
 
         return_expression  = res.register(self.expression())
@@ -912,7 +870,7 @@ class Parser:
       if self.current_token[TOKEN_TAG] != IF_U_SAY_SO:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected an 'IF U SAY SO' keyword!"))
       
-      res.register_advancement() # Eat IF U SAY SO
+      # Eat IF U SAY SO
       self.advance()
 
       return res.success(FuncDefNode(function_name, parameters, body_statements))
@@ -926,7 +884,7 @@ class Parser:
     parameters = []
 
     if self.current_token[TOKEN_TAG] == I_IZ:
-      res.register_advancement() # Eat I IZ
+      # Eat I IZ
       self.advance()
 
       # Identifier
@@ -938,7 +896,7 @@ class Parser:
 
       # Check if there are parameters
       if self.current_token[TOKEN_TAG] == YR:
-        res.register_advancement() # Eat YR
+        # Eat YR
         self.advance()
 
         first_param = res.register(self.expression())
@@ -948,7 +906,7 @@ class Parser:
 
         # Check for other params if there are any
         while self.current_token[TOKEN_TAG] == AN_YR:
-          res.register_advancement() # Eat AN YR
+          # Eat AN YR
           self.advance()
 
           additional_param = res.register(self.expression())
@@ -960,7 +918,7 @@ class Parser:
       if self.current_token[TOKEN_TAG] != MKAY:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected an 'MKAY' keyword!"))
       
-      res.register_advancement() # Eat MKAY
+      # Eat MKAY
       self.advance()
 
       return res.success(FuncCallNode(function_name, parameters))

@@ -121,12 +121,12 @@ token_exprs = [
     (bound('IS NOW A'),                       IS_NOW_A),
     (bound('VISIBLE'),                        VISIBLE),
     (bound('GIMMEH'),                         GIMMEH),
-    (bound('O RLY\?'),                        O_RLY),
+    (bound(r'O RLY\?'),                        O_RLY),
     (bound('YA RLY'),                         YA_RLY),
     (bound('MEBBE'),                          MEBBE),
     (bound('NO WAI'),                         NO_WAI),
     (bound('OIC'),                            OIC),
-    (bound('WTF\?'),                          WTF),
+    (bound(r'WTF\?'),                          WTF),
     (bound('OMG'),                            OMG),
     (bound('OMGWTF'),                         OMGWTF),
     (bound('IM IN YR'),                       IM_IN_YR),
@@ -143,7 +143,7 @@ token_exprs = [
     (bound('I IZ'),                           I_IZ),
     (bound('MKAY'),                           MKAY),
     (r'\+',                                   VISIBLE_OPERATOR),
-    (bound('-?[0-9]+\.[0-9]+'),               NUMBAR),          # Float
+    (bound(r'-?[0-9]+\.[0-9]+'),               NUMBAR),          # Float
     (bound('-?[0-9]+'),                       NUMBR),           # Integer
     (bound('"[^"]*"'),                        YARN),            # String
     (bound('(WIN|FAIL)'),                     TROOF),           # Boolean
