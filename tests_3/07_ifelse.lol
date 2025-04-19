@@ -11,14 +11,17 @@ HAI
 	VISIBLE "0. Exit"
 
 	VISIBLE "Choice: "
-	choice R 1
+	choice R 4
+	VISIBLE choice
+	VISIBLE "─────────────────────────────────────────────────"
 
 	BOTH SAEM choice AN 1
 	O RLY?
 		YA RLY
 			VISIBLE "Enter birth year: "
 			input R 2
-			VISIBLE DIFF OF 2022 AN input
+			VISIBLE input
+			VISIBLE "DIFF OF 2022 AN input: " + DIFF OF 2022 AN input
 OBTW
 	BTW uncomment this portion if you have MEBBE
 	BTW else, this portion should be ignored
