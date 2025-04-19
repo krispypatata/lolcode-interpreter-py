@@ -130,6 +130,9 @@ class Interpreter:
       if res.error: return res
       boolean_results.append(boolean_result)
     
+    # Since the boolean values in the list are still expressed in the lolcode boolean system, we need to convert each of them first to its true boolean value so we can perform the desired operation on the entire list
+    boolean_results = [boolean.value for boolean in boolean_results]
+
     if node.operation[TOKEN_TAG] == ALL_OF:
       value = Boolean(all(boolean_results))
     elif node.operation[TOKEN_TAG] == ANY_OF:
