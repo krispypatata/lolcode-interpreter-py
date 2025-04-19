@@ -7,10 +7,10 @@ HAI
     
     VISIBLE "Hello! Please enter two strings:"
     VISIBLE "String 1: "
-    x R  x
+    x R "Hello"
     VISIBLE x
     VISIBLE "String 2: "
-    x R  y
+    y R "World"
     VISIBLE y
 
     VISIBLE SMOOSH x AN y
@@ -19,6 +19,13 @@ HAI
 
     x R SMOOSH x AN y
     y R 100
+
+    VISIBLE "─────────────────────────────────────────────────"
+    VISIBLE "Reassigned values"
+    VISIBLE x
+    VISIBLE y
+    VISIBLE "─────────────────────────────────────────────────"
+
     VISIBLE x AN 52615 AN y AN MOD OF 10 AN 6 AN "End!"
 
     VISIBLE 10 AN y

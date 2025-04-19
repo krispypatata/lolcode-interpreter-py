@@ -33,9 +33,10 @@ def run(characters=None):
     context.symbol_table = global_symbol_table
     result = lolcode_interpreter.visit(ast.node, context)
 
-    print()
+    print("\n─────────────────────────────────────────────────")
     print("Symbol Table:")
     print(global_symbol_table.symbols)
+    print("─────────────────────────────────────────────────\n")
 
     return result.value, result.error
 
@@ -81,7 +82,7 @@ if __name__ == '__main__':
     b9 = 'tests_3/09_loops.lol'
     b10 = 'tests_3/10_functions.lol'
 
-    file = open(b1)
+    file = open(b5)
     characters = file.read()
     file.close()
 
