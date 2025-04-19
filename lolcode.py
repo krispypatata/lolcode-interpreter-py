@@ -82,7 +82,7 @@ if __name__ == '__main__':
     b9 = 'tests_3/09_loops.lol'
     b10 = 'tests_3/10_functions.lol'
 
-    file = open(b7)
+    file = open(b8)
     characters = file.read()
     file.close()
 

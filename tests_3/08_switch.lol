@@ -12,17 +12,21 @@ HAI
 
 	VISIBLE "Choice: "
 	choice R 2
+	VISIBLE choice
+	VISIBLE "─────────────────────────────────────────────────"
 
 	choice
 	WTF?
 		OMG 1
 			VISIBLE "Enter birth year: "
 			input R 2
+			VISIBLE input
 			VISIBLE DIFF OF 2022 AN input
 			GTFO
 		OMG 2
 			VISIBLE "Enter bill cost: "
 			input R 2
+			VISIBLE input
 			VISIBLE "Tip: " PRODUKT OF input AN 0.1
 			GTFO
 		OMG 3

@@ -480,6 +480,13 @@ class Parser:
 
         operands.append(additional_operand) # Add to list
 
+      # Raise an error if a delimiter symbol between operands is missing
+      previous_token_index = self.token_index - 1
+      previous_token = self.tokens[previous_token_index]
+      if self.current_token[TOKEN_LINE_NUMBER] == previous_token[TOKEN_LINE_NUMBER]:
+        return res.failure(InvalidSyntaxError(self.current_token, "Expected a delimiter symbol ('+' or 'AN') for the VISIBLE statement."))
+
+      # Success
       return res.success(PrintNode(operands))
   
     return res
