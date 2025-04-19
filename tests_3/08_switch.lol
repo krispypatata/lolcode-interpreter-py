@@ -11,7 +11,7 @@ HAI
 	VISIBLE "0. Exit"
 
 	VISIBLE "Choice: "
-	choice R 2
+	choice R 4
 	VISIBLE choice
 	VISIBLE "─────────────────────────────────────────────────"
 
@@ -27,12 +27,13 @@ HAI
 			VISIBLE "Enter bill cost: "
 			input R 2
 			VISIBLE input
-			VISIBLE "Tip: " PRODUKT OF input AN 0.1
+			VISIBLE "Tip: " AN PRODUKT OF input AN 0.1
 			GTFO
 		OMG 3
 			VISIBLE "Enter width: "
 			input R 2
-			VISIBLE "Square Area: " PRODUKT OF input AN input
+			VISIBLE input
+			VISIBLE "Square Area: " + PRODUKT OF input AN input
 			GTFO
 		OMG 0
 			VISIBLE "Goodbye"
