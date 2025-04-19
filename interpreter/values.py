@@ -22,7 +22,7 @@ class Value:
   def explicit_typecast(self, target_class, to_float=False): # To float is for typecasting Flot->Int or Int->FLoat
     raise NotImplementedError("Subclasses must implement this method")
 
-  # ═════════════════════════════════════════════════════════════════════════════════════════════════
+  # ════════════════════════════════════════════════════════════════════════════════════════════════
   # Number Arithmetic operations (ensure result is always a Number)
   def added_by(self, other):
     # Typecast both operands to Number before performing the addition
@@ -244,6 +244,7 @@ class Noob(Value):
   def __repr__(self):
     return str('NOOB')   
 
+# ═════════════════════════════════════════════════════════════════════════════════════════════════
 class String(Value):
   def __init__(self, value, line_number=None):
     self.value = value
@@ -280,6 +281,7 @@ class String(Value):
   def __repr__(self):
     return str(self.value) 
 
+# ═════════════════════════════════════════════════════════════════════════════════════════════════
 class Number(Value):
   def __init__(self, value, line_number=None):
     self.value = value
@@ -343,6 +345,7 @@ class Number(Value):
   def __repr__(self):
     return str(self.value)
 
+# ═════════════════════════════════════════════════════════════════════════════════════════════════
 class Boolean(Value):
   def __init__(self, value_representation, line_number=None):
     self.line_number = line_number
@@ -400,6 +403,7 @@ class Boolean(Value):
   def __repr__(self):
     return str(self.get_value_representation())
 
+# ═════════════════════════════════════════════════════════════════════════════════════════════════
 class Function(Value):
   def __init__(self, function_name, parameters, body_statements):
     self.function_name = function_name
@@ -451,3 +455,4 @@ class Function(Value):
 
   def __repr__(self):
     return f"<function {self.function_name}>"
+  

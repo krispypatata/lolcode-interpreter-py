@@ -76,3 +76,4 @@ def validate_multiline_comments(characters) :
     if found_tldr_without_obtw:
         sys.stderr.write("Error: Found 'TLDR' without a preceding 'OBTW'.\n")
         sys.exit(1)
+        

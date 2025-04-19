@@ -16,3 +16,4 @@ class InvalidSyntaxError(Error):
 class RuntimeError(Error):
   def __init__(self, token, details):
     super().__init__(token, details, error_name='Runtime Error')
+    

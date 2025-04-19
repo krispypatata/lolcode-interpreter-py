@@ -803,7 +803,7 @@ class Parser:
       # Eat label
       self.advance()
 
-      print(label, out_label)
+      # print(label, out_label)
       if label != out_label:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected a similar label to exit the loop!"))
       
@@ -924,4 +924,3 @@ class Parser:
       return res.success(FuncCallNode(function_name, parameters))
 
     return res
-

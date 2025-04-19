@@ -8,25 +8,25 @@ global_symbol_table = SymbolTable()
 global_symbol_table.set("IT", Number(0))
 
 def run(characters=None):
-    print('Input Text:')
-    print(characters)
+    # print('Input Text:')
+    # print(characters)
 
     # Generate Tokens
     tokens = lolcode_lex(characters)
     # tokens.append(('EOF', EOF, tokens[-1][TOKEN_LINE_NUMBER])) # Add end of line
 
-    print('\nTokens:')
-    print(tokens)
-    print()
+    # print('\nTokens:')
+    # print(tokens)
+    # print()
 
     # Generate ast
     lolcode_parser = Parser(tokens)
     ast = lolcode_parser.parse()
     if ast.error: return None, ast.error
 
-    print('\nAST:')
-    print(ast.node)
-    print()
+    # print('\nAST:')
+    # print(ast.node)
+    # print()
     # Run program
     lolcode_interpreter = Interpreter()
     context = Context('<program>')
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     b9 = 'tests_3/09_loops.lol'
     b10 = 'tests_3/10_functions.lol'
 
-    file = open(b10)
+    file = open(b1)
     characters = file.read()
     file.close()
 
@@ -90,4 +90,3 @@ if __name__ == '__main__':
     if error: print(error.as_string())
     else: 
         print(result)
-

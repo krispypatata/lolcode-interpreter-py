@@ -7,43 +7,51 @@ from .values import *
 # INTERPRETER
 # ═════════════════════════════════════════════════════════════════════════════════════════════════
 class Interpreter:
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit(self, node, context):
     method_name = f'visit_{type(node).__name__}'
     method = getattr(self, method_name, self.no_visit_method)
     return method(node, context)
   
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def no_visit_method(self, node, context):
     raise Exception(f'No visit_{type(node).__name__} method defined')
   
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_IntegerNode(self, node, context):
     # print("Found integer node")
     return RTResult().success(
       Number(int(node.token[TOKEN_VALUE]), node.token[TOKEN_LINE_NUMBER])
     )
   
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_FloatNode(self, node, context):
     # print("Found float node")
     return RTResult().success(
       Number(float(node.token[TOKEN_VALUE]), node.token[TOKEN_LINE_NUMBER])
     )
   
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_BooleanNode(self, node, context):
     # print("Found boolean node")
     return RTResult().success(
       Boolean(node.token[TOKEN_VALUE], node.token[TOKEN_LINE_NUMBER])
     )
   
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_StringNode(self, node, context):
     # print("Found string node")
     return RTResult().success(
       String(node.token[TOKEN_VALUE], node.token[TOKEN_LINE_NUMBER])
     )
   
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_NoobNode(self, node, context):
     return RTResult().success(
       Noob(node.line_number)
     )    
   
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_ArithmeticBinaryOpNode(self, node, context):
     # print("Found ar bin op node")
     res = RTResult()
@@ -79,6 +87,7 @@ class Interpreter:
       # context.symbol_table.set('IT', result)
       return res.success(result)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_BooleanBinaryOpNode(self, node, context):
     # print("Found bool bin op node")
     res = RTResult()
@@ -99,6 +108,7 @@ class Interpreter:
     if (error): return res.failure(error)
     else: return res.success(result)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_BooleanUnaryOpNode(self, node, context):
     res = RTResult()
     operand_ = res.register(self.visit(node.operand, context))
@@ -110,6 +120,7 @@ class Interpreter:
     if (error): return res.failure(error)
     else: return res.success(result)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_BooleanTernaryOpNode(self, node, context):
     res = RTResult()
     value = None
@@ -126,6 +137,7 @@ class Interpreter:
 
     return res.success(value)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_ComparisonOpNode(self, node, context):
     # print("Found comparison op node")
     res = RTResult()
@@ -143,6 +155,7 @@ class Interpreter:
     if (error): return res.failure(error)
     else: return res.success(result)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_StringConcatNode(self, node, context):
     res = RTResult()
     string_value = ""
@@ -162,6 +175,7 @@ class Interpreter:
     
     return res.success(string_value)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_VarAccessNode(self, node, context):
     res = RTResult()
     var_name = node.var_name_token[TOKEN_VALUE]
@@ -172,6 +186,7 @@ class Interpreter:
     value = context.symbol_table.get(var_name)
     return res.success(value)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_VarDeclarationNode(self, node, context):
     res = RTResult()
     var_name = node.var_name_token[TOKEN_VALUE]
@@ -187,6 +202,7 @@ class Interpreter:
     context.symbol_table.set(var_name, value)
     return res.success(value)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_VarAssignmentNode(self, node, context):
     res = RTResult()
     
@@ -199,6 +215,7 @@ class Interpreter:
     context.symbol_table.set(var_to_access, value_to_assign)
     return res.success(value_to_assign)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_StatementListNode(self, node, context):
     res = RTResult()
     for statement in node.statements:
@@ -207,6 +224,7 @@ class Interpreter:
       context.symbol_table.set('IT', implicit_value)  # update the IT variable
     return res.success(None)
   
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_VarDecListNode(self, node, context):
     res = RTResult()
     for variable_declaration in node.variable_declarations:
@@ -214,6 +232,7 @@ class Interpreter:
         if res.error: return res
     return res.success(None)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_PrintNode(self, node, context):
     res = RTResult()
     print_value = ""
@@ -227,6 +246,7 @@ class Interpreter:
 
     return res.success(print_value)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_TypecastNode(self, node, context):
     res = RTResult()
 
@@ -248,6 +268,7 @@ class Interpreter:
 
     return res.success(converted_value)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_SwitchCaseNode(self, node, context):
     res = RTResult()
     is_there_a_true_case = False
@@ -282,6 +303,7 @@ class Interpreter:
 
     return res.success(basis)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_IfNode(self, node, context):
     res = RTResult()
     basis = context.symbol_table.get('IT')
@@ -300,6 +322,7 @@ class Interpreter:
 
     return res.success(basis)
   
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_LoopNode(self, node, context):
     res = RTResult()
 
@@ -341,6 +364,7 @@ class Interpreter:
 
     return res.success(label)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_FuncDefNode(self, node, context):
     res = RTResult()
     return_value = None
@@ -360,6 +384,7 @@ class Interpreter:
     context.symbol_table.set(function_name, function_value)
     return res.success(function_value)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_FuncCallNode(self, node, context):
     res = RTResult()
     return_value = Noob()
@@ -380,6 +405,7 @@ class Interpreter:
     return_value = function_to_call.execute(parameters_to_pass)
     return res.success(return_value.value)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_InputNode(self, node, context):
     res = RTResult()
     variable = node.variable
@@ -394,12 +420,14 @@ class Interpreter:
 
     return res.success(value)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_BreakNode(self, node, context):
     res = RTResult()
     break_token = node.break_token
     return_value = Break(break_token[TOKEN_VALUE]).set_context(context)
     return res.success(return_value)
 
+  # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_ProgramNode(self, node, context):
     res = RTResult()
     for section in node.sections:

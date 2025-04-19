@@ -51,3 +51,4 @@ class SymbolTable:
 
   def remove(self, name):
     del self.symbols[name]
+    
