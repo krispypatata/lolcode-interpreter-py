@@ -21,16 +21,16 @@ HAI
     IF U SAY SO
 
      num1  R 2
-     num2  R 2
+     num2  R 6
 
     I IZ addNum YR num1 AN YR num2 MKAY
     VISIBLE IT
 
-     name  R 2
+    name  R "Keith"
     I IZ printName YR name MKAY
     VISIBLE IT
 
-    I IZ printNum YR SUM OF x AN 2 MKAY
+    I IZ printNum YR SUM OF x AN 9 MKAY
     VISIBLE IT
 
 KTHXBYE
