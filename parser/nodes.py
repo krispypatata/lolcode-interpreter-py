@@ -158,15 +158,16 @@ class IfNode:
     return f"IfElse({self.if_block_statements}, {self.else_block_statements})"
 
 class LoopNode:
-  def __init__(self, label, operation, variable, til_wile_expression, body_statements):
+  def __init__(self, label, operation, variable, clause_type, til_wile_expression, body_statements):
     self.label = label
     self.operation = operation
     self.variable = variable
+    self.clause_type = clause_type
     self.til_wile_expression = til_wile_expression
     self.body_statements = body_statements
 
   def __repr__(self):
-    return f"Loop({self.label}, {self.operation[TOKEN_VALUE]}, {self.variable}, {self.til_wile_expression}, {self.body_statements})"
+    return f"Loop({self.label}, {self.operation[TOKEN_VALUE]}, {self.variable}, {self.clause_type}, {self.til_wile_expression}, {self.body_statements})"
 
 class FuncDefNode:
   def __init__(self, function_name, parameters, body_statements):

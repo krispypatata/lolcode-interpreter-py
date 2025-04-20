@@ -1,5 +1,6 @@
 from lexer.lolcode_lexer import *
 from parser.nodes import *
+from parser.errors import *
 from .runtime import *
 from .values import *
 
@@ -332,19 +333,34 @@ class Interpreter:
     label = node.label
     operation = node.operation
     variable = node.variable
+    clause_type = node.clause_type
     til_wile_expression = node.til_wile_expression
     body_statements = node.body_statements
 
     termination_condition = None
 
+    # Proceed to the loop
     is_running = True
     while is_running:
-      # termination_condition = None
-      if (til_wile_expression != None):
+      if (clause_type and til_wile_expression != None):
         termination_condition = res.register(self.visit(til_wile_expression, context))
         if res.error: return res
 
-      if (termination_condition is not None and termination_condition.value):
+      # Distinguish TIL with WILE
+      # The TIL <expression> clause will repeat the loop as long as <expression> is FAIL.
+      if (
+          clause_type == TIL and
+          termination_condition is not None and
+          termination_condition.value == True
+      ):
+        break
+      
+      # The WILE <expression> clause will repeat the loop as long as <expression> returns WIN.
+      if (
+          clause_type == WILE and
+          termination_condition is not None and
+          termination_condition.value == False
+      ):
         break
 
       for statement in body_statements:

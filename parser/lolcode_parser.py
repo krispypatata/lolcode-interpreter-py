@@ -747,12 +747,12 @@ class Parser:
       # Eat label
       self.advance()
 
-
       if self.current_token[TOKEN_TAG] not in (UPPIN, NERFIN):
         return res.failure(InvalidSyntaxError(self.current_token, "Expected an operation for the loop condition!"))
       
       # Else, no error
       operation = self.current_token
+
       # Eat UPPIN or NERFIN
       self.advance()
 
@@ -767,19 +767,17 @@ class Parser:
       if self.current_token[TOKEN_TAG] != IDENTIFIER:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected a variable for the loop!"))
 
-      # variable = res.register(self.variable_literal())
-
-      # # Has error
-      # if variable is None:
-      #   return res    
+      # Get the desired variable to access (same with assignment statement)
       variable = self.current_token
+
       # Eat variable
       self.advance()
 
-
       # TIL/WILE
+      clause_type = None
       if self.current_token[TOKEN_TAG] in (TIL, WILE):
         # Eat TIL or WILE
+        clause_type = self.current_token[TOKEN_TAG]
         self.advance()
 
         til_wile_expression = res.register(self.expression())
@@ -805,11 +803,11 @@ class Parser:
       # Eat IM OUTTA YR
       self.advance()
 
-      
       if self.current_token[TOKEN_TAG] != IDENTIFIER:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected a label to exit the loop!"))
 
       out_label = self.current_token[TOKEN_VALUE]
+
       # Eat label
       self.advance()
 
@@ -818,7 +816,7 @@ class Parser:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected a similar label to exit the loop!"))
       
       
-      return res.success(LoopNode(label, operation, variable, til_wile_expression, body_statements))
+      return res.success(LoopNode(label, operation, variable, clause_type, til_wile_expression, body_statements))
     
     return res
 
