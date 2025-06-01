@@ -5,13 +5,13 @@ HAI
         I HAS A num ITZ 17
     BUHBYE
 
-    mond R 1
-    BTW GIMMEH monde
+    BTW monde R 5
+    GIMMEH monde
 
     VISIBLE monde + " + "  + num + " = " + SUM OF monde AN num
 
     GIMMEH num
     GIMMEH monde
 
-    VISIBLE DIFF OF num AN monde
+    VISIBLE num + " - "  + monde + " = " + DIFF OF num AN monde
 KTHXBYE
