@@ -429,12 +429,19 @@ class Interpreter:
     res = RTResult()
     variable = node.variable
 
+    # Check if the variable is defined in the symbol table
     if context.symbol_table.found(variable.var_name_token[TOKEN_VALUE]):
-      user_input = String(input("Enter input: "))
+      # Get user input and create a StringNode with it
+      user_input_value = str(input("Enter a value: "))
+      user_input_value = " " + user_input_value + " "
+      user_input = StringNode((user_input_value, None, variable.var_name_token[TOKEN_LINE_NUMBER]))
+
+      # Assign the user input to the variable in the symbol table
       value = res.register(self.visit(VarAssignmentNode(variable.var_name_token, user_input), context))
     else:
-      res.failure(RuntimeError(
-        ('Var Access Error', None, variable.var_name_token[TOKEN_LINE_NUMBER]), "Can't find var"
+      # If the variable is not defined, return an error
+      return res.failure(RuntimeError(
+        ('Var Access Error', None, variable.var_name_token[TOKEN_LINE_NUMBER]), f"Can't find a variable named '{variable.var_name_token[TOKEN_VALUE]}'"
       ))
 
     return res.success(value)

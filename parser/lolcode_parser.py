@@ -563,7 +563,6 @@ class Parser:
     return res
 
 # ═════════════════════════════════════════════════════════════════════════════════════════════════
-  # TODO: GIMMEH
   def input_statement(self):
     res = ParseResult()
 
@@ -573,15 +572,13 @@ class Parser:
       # Error
       if self.current_token[TOKEN_TAG] != IDENTIFIER:
         return res.failure(InvalidSyntaxError(self.current_token, "Expected a variable to store input!"))
-      
-      variable = res.register(self.variable_literal())
-      if variable is None: return res # Error
 
-      # Get user input
-      user_input_value = str(input("Enter a value: "))
-      user_input_value = " " + user_input_value + " "
-      user_input = StringNode((user_input_value, None, self.current_token[TOKEN_LINE_NUMBER]))
-      return res.success(VarAssignmentNode(variable.var_name_token, user_input))
+      # Check if the variable name is valid      
+      variable_to_access = res.register(self.variable_literal())
+      if variable_to_access is None: return res # Error
+
+      # Proceed to the next step (getting user input and storing it in the variable stated)
+      return res.success(InputNode(variable_to_access))
 
     return res
 
