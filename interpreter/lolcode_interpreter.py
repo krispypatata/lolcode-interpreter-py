@@ -210,13 +210,13 @@ class Interpreter:
   def visit_VarAssignmentNode(self, node, context):
     res = RTResult()
     
-    var_to_access = node.var_to_access[TOKEN_VALUE]
+    var_to_access = node.var_to_access
     value_to_assign = res.register(self.visit(node.value_to_assign, context))
 
-    if not context.symbol_table.found(var_to_access):
-      return res.failure(RuntimeError(node.var_name_token, f"'{var_to_access} is not defined!'"))
+    if not context.symbol_table.found(var_to_access[TOKEN_VALUE]):
+      return res.failure(RuntimeError(var_to_access, f"'{var_to_access[TOKEN_VALUE]} is not defined!'"))
 
-    context.symbol_table.set(var_to_access, value_to_assign)
+    context.symbol_table.set(var_to_access[TOKEN_VALUE], value_to_assign)
     return res.success(value_to_assign)
 
   # ───────────────────────────────────────────────────────────────────────────────────────────────
