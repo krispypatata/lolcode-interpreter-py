@@ -1,5 +1,6 @@
 import re
 from .runtime import *
+from parser.errors import *
 
 # ═════════════════════════════════════════════════════════════════════════════════════════════════
 # VALUES
