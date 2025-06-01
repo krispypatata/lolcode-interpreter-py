@@ -5,10 +5,10 @@ HAI
         I HAS A num ITZ 17
     BUHBYE
 
-    GIMMEH monde
+    mond R 1
+    BTW GIMMEH monde
 
-    VISIBLE SUM OF monde AN num
-    VISIBLE monde
+    VISIBLE monde + " + "  + num + " = " + SUM OF monde AN num
 
     GIMMEH num
     GIMMEH monde
