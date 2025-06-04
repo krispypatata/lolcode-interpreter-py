@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk # For tables
 from tkinter import filedialog # For opening files
-from PIL import Image, ImageTk # For file chooser icon
 import os
 import tkinter.font as tkfont
 
@@ -181,48 +180,6 @@ class CodeEditor(tk.Frame):
         self.update_line_numbers()
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
-class FileChooserButton(tk.Frame):
-    def __init__(self, parent, iconImage, command=None, prefHeight=30):
-        super().__init__(parent, bg="lightgrey", bd=1, relief="raised", height=prefHeight)
-        self.pack_propagate(False)  # Prevent resizing to fit contents
-
-        self.iconImage = iconImage
-        self.command = command
-
-        # File label
-        self.fileLabel = tk.Label(self, text="(None)", fg="black", bg=self["background"])
-        self.fileLabel.pack(side="left", padx=(5, 2), pady=(0, 2))
-
-        # Folder icon
-        self.iconLabel = tk.Label(self, image=self.iconImage, bg=self["background"])
-        self.iconLabel.image = self.iconImage  # Prevent garbage collection
-        self.iconLabel.pack(side="right", padx=(0, 5))
-
-        # Separator (for aesthetics)
-        self.separator = tk.Label(self, text="|", fg="gray", bg=self["background"])
-        self.separator.pack(side="right", pady=(0, 5))
-        
-        # Bind events
-        for widget in (self, self.fileLabel, self.separator, self.iconLabel):
-            widget.bind("<ButtonPress-1>", self.on_press)
-            widget.bind("<ButtonRelease-1>", self.on_release)
-
-    def on_press(self, event):
-        self._pressed = True
-        self.config(relief="sunken")
-
-    def on_release(self, event):
-        if self._pressed:
-            self.config(relief="raised")
-            if self.command:
-                self.command()
-        self._pressed = False
-
-    def set_filename(self, filename):
-        self.fileLabel.config(text=filename)
-
-
-# ───────────────────────────────────────────────────────────────────────────────────────────────
 # Class for tooltips for tables
 # Functionlity: If the text in a cell is longer than the column width, a tooltip will appear when hovering over the cell
 class TreeviewTooltip:
@@ -338,16 +295,6 @@ topView.rowconfigure(0, weight=1)
 codeEditorView = tk.Frame(topView)
 codeEditorView.grid(row=0, column=0, sticky="nsew")
 
-# Load the icon for the file chooser button
-folder_icon_path = "gui/assets/blue-folder-icon.png"
-try:
-    folder_image = Image.open(folder_icon_path)
-    folder_image = folder_image.resize((20, 20), Image.Resampling.LANCZOS)
-    folder_photo = ImageTk.PhotoImage(folder_image)
-except Exception as e:
-    print(f"Error loading folder icon: {e}")
-    folder_photo = None # Set to None if image loading fails
-
 # Subfunction for file chooser button's functionality
 def choose_file():
     fileTypes = [
@@ -372,24 +319,23 @@ def choose_file():
         except Exception as e:
             print(f"Failed to open file: {e}")
 
-
+# Grid configuration for the code editor view (top = file chooser, bottom = code editor)
 codeEditorView.columnconfigure(0, weight=1)
 codeEditorView.rowconfigure(0, weight=0)
 codeEditorView.rowconfigure(1, weight=1)
 
-# fileChooserButton = FileChooserButton(codeEditorView, iconImage=folder_photo, command=choose_file, prefHeight=25)
-# fileChooserButton.grid(row=0, column=0, sticky="ew", pady=(1,1))
-
-# Wrap in a frame to enforce height
+# Top (file chooser)
+# Wrap in a frame to for ce the button to have a fixed height
 fileChooserFrame = tk.Frame(codeEditorView, height=27)
 fileChooserFrame.grid(row=0, column=0, sticky="ew")
 fileChooserFrame.grid_propagate(False)  # Prevent resizing
 
-fileChooserButton = tk.Button(fileChooserFrame, text="Open LOLCODE file", command=choose_file, anchor="w")
+fileChooserButton = tk.Button(fileChooserFrame, text="Open LOLCODE file", 
+                              command=choose_file, anchor="w")
 fileChooserButton.place(x=0, y=0, relwidth=1, relheight=1)
 
 
-# codeEditor = tk.Text(codeEditorView, wrap="word", background="white")
+# Bottom (code editor)
 codeEditor = CodeEditor(codeEditorView, background="white")
 codeEditor.grid(row=1, column=0, sticky="nsew")
 
