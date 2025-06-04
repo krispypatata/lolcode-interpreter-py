@@ -181,11 +181,13 @@ class CodeEditor(tk.Frame):
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
 # Class for tooltips for tables
-# Functionlity: If the text in a cell is longer than the column width, a tooltip will appear when hovering over the cell
+# Functionality: If the text in a cell is longer than the column width, a tooltip will appear when hovering over the cell
 class TreeviewTooltip:
     def __init__(self, treeview):
         self.treeview = treeview
         self.tooltip = None
+        self.current_item = None
+        self.current_column = None
         self.treeview.bind('<Motion>', self._on_motion)
         self.treeview.bind('<Leave>', self._hide_tooltip)
         
@@ -194,32 +196,38 @@ class TreeviewTooltip:
         item = self.treeview.identify_row(event.y)
         column = self.treeview.identify_column(event.x)
         
-        if item and column:
-            # Get column index (tkinter uses 1-based indexing for columns)
-            columnIndex = int(column.replace('#', '')) - 1
-            
-            # Get the text in the cell
-            values = self.treeview.item(item, 'values')
-            if columnIndex < len(values):
-                text = str(values[columnIndex])
-                
-                # Get column width
-                col_name = self.treeview['columns'][columnIndex]
-                col_width = self.treeview.column(col_name, 'width')
-                
-                # Check if text is longer than what can fit in the column
-                # Use default font
-                font = tkfont.nametofont("TkDefaultFont")
-                text_width = font.measure(text)
-                
-                if text_width > col_width - 10:  # (-10) for padding
-                    self._show_tooltip(event, text)
-                else:
-                    self._hide_tooltip()
-            else:
-                self._hide_tooltip()
-        else:
+        # Check if we've moved to a different cell
+        if item != self.current_item or column != self.current_column:
+            # Hide current tooltip since we've moved to a different cell
             self._hide_tooltip()
+            
+            # Update current position
+            self.current_item = item
+            self.current_column = column
+            
+            if item and column:
+                # Get column index (tkinter uses 1-based indexing for columns)
+                columnIndex = int(column.replace('#', '')) - 1
+                
+                # Get the text in the cell
+                values = self.treeview.item(item, 'values')
+                if columnIndex < len(values):
+                    text = str(values[columnIndex])
+                    
+                    # Get column width
+                    col_name = self.treeview['columns'][columnIndex]
+                    col_width = self.treeview.column(col_name, 'width')
+                    
+                    # Check if text is longer than what can fit in the column
+                    # Use default font
+                    font = tkfont.nametofont("TkDefaultFont")
+                    text_width = font.measure(text)
+                    
+                    if text_width > col_width - 10:  # (-10) for padding
+                        self._show_tooltip(event, text)
+        elif self.tooltip:
+            # We're in the same cell but cursor moved - update tooltip position
+            self._update_tooltip_position(event)
     
     def _show_tooltip(self, event, text):
         if self.tooltip:
@@ -251,10 +259,66 @@ class TreeviewTooltip:
         # Make tooltip visible
         self.tooltip.deiconify()
         
+    def _update_tooltip_position(self, event):
+        """Update tooltip position to follow cursor within the same cell"""
+        if self.tooltip:
+            # Get tooltip dimensions
+            tooltip_height = self.tooltip.winfo_reqheight()
+            
+            # Calculate new position
+            x_pos = event.x_root + 10
+            y_pos = event.y_root - tooltip_height - 5  # offset above cursor
+            
+            # Move tooltip to new position
+            self.tooltip.wm_geometry(f"+{x_pos}+{y_pos}")
+    
     def _hide_tooltip(self, event=None):
         if self.tooltip:
             self.tooltip.destroy()
             self.tooltip = None
+        # Reset current position tracking
+        self.current_item = None
+        self.current_column = None
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────
+# Function to choose a file and load its content into the code editor
+def choose_file(fileChooserButton, codeEditor):
+    """Open a file dialog to choose a LOLCODE file and load its content into the code editor."""
+    fileTypes = [
+        ("LOLCODE files", "*.lol"),
+        ("All files", "*.*"),
+    ]
+    filePath = filedialog.askopenfilename(
+        title="Open file",
+        filetypes=fileTypes,
+        defaultextension=".lol"
+    )
+    if filePath:
+        filename = os.path.basename(filePath)
+        fileChooserButton.config(text=filename) 
+        try:
+            with open(filePath, "r", encoding="utf-8") as f:
+                content = f.read()
+            codeEditor.textWidget.delete("1.0", tk.END)
+            codeEditor.textWidget.insert("1.0", content)
+            codeEditor.update_line_numbers()
+        except Exception as e:
+            print(f"Failed to open file: {e}")
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────
+# Function to update the contents of a table (tree) with new data
+def update_table_contents(table, data):
+    """
+        Update the contents of a table (tree) with new data.
+        Data are expected to be a list of tuples, where each tuple represents a row.
+    """
+    # Clear existing data
+    for item in table.get_children():
+        table.delete(item)
+    
+    # Insert new data
+    for row in data:
+        table.insert("", "end", values=row)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
@@ -295,34 +359,14 @@ topView.rowconfigure(0, weight=1)
 codeEditorView = tk.Frame(topView)
 codeEditorView.grid(row=0, column=0, sticky="nsew")
 
-# Subfunction for file chooser button's functionality
-def choose_file():
-    fileTypes = [
-        ("LOLCODE files", "*.lol"),
-        ("All files", "*.*"),
-    ]
-    filePath = filedialog.askopenfilename(
-        title="Open file",
-        filetypes=fileTypes,
-        defaultextension=".lol"
-    )
-    if filePath:
-        filename = os.path.basename(filePath)
-        # fileChooserButton.set_filename(filename)
-        fileChooserButton.config(text=filename) 
-        try:
-            with open(filePath, "r", encoding="utf-8") as f:
-                content = f.read()
-            codeEditor.textWidget.delete("1.0", tk.END)
-            codeEditor.textWidget.insert("1.0", content)
-            codeEditor.update_line_numbers()
-        except Exception as e:
-            print(f"Failed to open file: {e}")
-
 # Grid configuration for the code editor view (top = file chooser, bottom = code editor)
 codeEditorView.columnconfigure(0, weight=1)
 codeEditorView.rowconfigure(0, weight=0)
 codeEditorView.rowconfigure(1, weight=1)
+
+# Bottom (code editor)
+codeEditor = CodeEditor(codeEditorView, background="white")
+codeEditor.grid(row=1, column=0, sticky="nsew")
 
 # Top (file chooser)
 # Wrap in a frame to for ce the button to have a fixed height
@@ -331,13 +375,8 @@ fileChooserFrame.grid(row=0, column=0, sticky="ew")
 fileChooserFrame.grid_propagate(False)  # Prevent resizing
 
 fileChooserButton = tk.Button(fileChooserFrame, text="Open LOLCODE file", 
-                              command=choose_file, anchor="w")
+                              command=lambda: choose_file(fileChooserButton, codeEditor), anchor="w")
 fileChooserButton.place(x=0, y=0, relwidth=1, relheight=1)
-
-
-# Bottom (code editor)
-codeEditor = CodeEditor(codeEditorView, background="white")
-codeEditor.grid(row=1, column=0, sticky="nsew")
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
 # Right side
@@ -372,9 +411,16 @@ lexemeTree.column(lexemeColumns[1], width=int(LEXEME_TABLE_WIDTH * 2 / 5), ancho
 lexemeTree.heading(lexemeColumns[2], text=lexemeColumns[2])
 lexemeTree.column(lexemeColumns[2], width=int(LEXEME_TABLE_WIDTH * 1 / 5), anchor="center")
 
+############################################################################################
+# DELETE THIS LATER
 # Sample data
+sample_data = []
 for i in range(20):
-    lexemeTree.insert("", "end", values=(f"lexLONGTEXTEXAMPLE{i}", f"Additional Parameter Variable{i%3}", i+1))
+    # lexemeTree.insert("", "end", values=(f"lexLONGTEXTEXAMPLE{i}", f"Additional Parameter Variable{i%3}", i+1))
+    sample_data.append((f"lexLONGTEXTEXAMPLE{i}", f"Additional Parameter Variable{i%3}", i+1))
+# Use the function to update the table contents
+update_table_contents(lexemeTree, sample_data)
+############################################################################################
 
 lexemeScrollbar = ttk.Scrollbar(lexemeTableView, orient="vertical", command=lexemeTree.yview)
 lexemeTree.configure(yscrollcommand=lexemeScrollbar.set)
@@ -401,9 +447,15 @@ for col in symbolColumns:
     symbolTree.column(col, width=int(SYMBOL_TABLE_WIDTH / 2))
     # symbolTree.column(col, width=120, anchor="center")
 
+############################################################################################
+# DELETE THIS LATER
 # Sample data
-for i in range(15):
-    symbolTree.insert("", "end", values=(f"symbol{i}", f"value{i}"))
+sample_data = []
+for i in range(20):
+    sample_data.append((f"symbolsymbol{i}", f"value{i}"))
+# Use the function to update the table contents
+update_table_contents(symbolTree, sample_data)
+############################################################################################
 
 symbolScrollbar = ttk.Scrollbar(symbolTableView, orient="vertical", command=symbolTree.yview)
 symbolTree.configure(yscrollcommand=symbolScrollbar.set)
