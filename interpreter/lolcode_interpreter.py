@@ -426,14 +426,27 @@ class Interpreter:
 
   # ───────────────────────────────────────────────────────────────────────────────────────────────
   def visit_InputNode(self, node, context):
+    from common import globals
+    from gui.lolcode_gui import get_user_input
+
     res = RTResult()
     variable = node.variable
 
     # Check if the variable is defined in the symbol table
     if context.symbol_table.found(variable.var_name_token[TOKEN_VALUE]):
       # Get user input and create a StringNode with it
-      user_input_value = str(input("Enter a value: "))
-      user_input_value = " " + user_input_value + " "
+      user_input_value = None
+
+    # If no GUI is used, we can use the input function directly
+    # Otherwise, we'll use a tkinter popup window to get user input
+      if globals.no_gui:
+        user_input_value = str(input("Enter a value: "))
+        user_input_value = " " + user_input_value + " "
+      else:
+        print("Enter a value:", end="")
+        user_input_value = " " + get_user_input() + " "
+        print(user_input_value)
+
       user_input = StringNode((user_input_value, None, variable.var_name_token[TOKEN_LINE_NUMBER]))
 
       # Assign the user input to the variable in the symbol table

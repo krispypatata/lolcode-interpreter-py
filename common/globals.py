@@ -1,1 +1,1 @@
-no_gui = False
+no_gui = True
