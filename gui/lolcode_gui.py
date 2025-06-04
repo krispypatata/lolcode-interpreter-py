@@ -221,6 +221,85 @@ class FileChooserButton(tk.Frame):
     def set_filename(self, filename):
         self.fileLabel.config(text=filename)
 
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────
+# Class for tooltips for tables
+# Functionlity: If the text in a cell is longer than the column width, a tooltip will appear when hovering over the cell
+class TreeviewTooltip:
+    def __init__(self, treeview):
+        self.treeview = treeview
+        self.tooltip = None
+        self.treeview.bind('<Motion>', self._on_motion)
+        self.treeview.bind('<Leave>', self._hide_tooltip)
+        
+    def _on_motion(self, event):
+        # Get the item and column under the cursor
+        item = self.treeview.identify_row(event.y)
+        column = self.treeview.identify_column(event.x)
+        
+        if item and column:
+            # Get column index (tkinter uses 1-based indexing for columns)
+            columnIndex = int(column.replace('#', '')) - 1
+            
+            # Get the text in the cell
+            values = self.treeview.item(item, 'values')
+            if columnIndex < len(values):
+                text = str(values[columnIndex])
+                
+                # Get column width
+                col_name = self.treeview['columns'][columnIndex]
+                col_width = self.treeview.column(col_name, 'width')
+                
+                # Check if text is longer than what can fit in the column
+                # Use default font
+                font = tkfont.nametofont("TkDefaultFont")
+                text_width = font.measure(text)
+                
+                if text_width > col_width - 10:  # (-10) for padding
+                    self._show_tooltip(event, text)
+                else:
+                    self._hide_tooltip()
+            else:
+                self._hide_tooltip()
+        else:
+            self._hide_tooltip()
+    
+    def _show_tooltip(self, event, text):
+        if self.tooltip:
+            self.tooltip.destroy()
+            
+        # Create a tooltip window
+        self.tooltip = tk.Toplevel(self.treeview)
+        self.tooltip.wm_overrideredirect(True)
+        
+        # Initially place the tooltip window outside the screen (not visible to the users) - this is to fix flickering issues
+        self.tooltip.wm_geometry(f"+{-1000}+{-1000}")
+        
+        self.tooltip.configure(bg='lightyellow', relief='solid', borderwidth=1)
+        label = tk.Label(self.tooltip, text=text, bg='lightyellow', 
+                         wraplength=300, justify='left', font=('TkDefaultFont', 10))
+        label.pack(padx=2, pady=1)
+        
+        # Update the tooltip to get actual dimensions
+        self.tooltip.update_idletasks()
+        tooltip_height = self.tooltip.winfo_reqheight()
+        
+        # Calculate final position
+        x_pos = event.x_root + 10
+        y_pos = event.y_root - tooltip_height - 5  # offset above cursor
+        
+        # Move tooltip to final position
+        self.tooltip.wm_geometry(f"+{x_pos}+{y_pos}")
+        
+        # Make tooltip visible
+        self.tooltip.deiconify()
+        
+    def _hide_tooltip(self, event=None):
+        if self.tooltip:
+            self.tooltip.destroy()
+            self.tooltip = None
+
+
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 root = tk.Tk()
 root.title("LOLCODE Interpreter")
@@ -349,7 +428,7 @@ lexemeTree.column(lexemeColumns[2], width=int(LEXEME_TABLE_WIDTH * 1 / 5), ancho
 
 # Sample data
 for i in range(20):
-    lexemeTree.insert("", "end", values=(f"lexLONGTEXTEXAMPLE{i}", f"type{i%3}", i+1))
+    lexemeTree.insert("", "end", values=(f"lexLONGTEXTEXAMPLE{i}", f"Additional Parameter Variable{i%3}", i+1))
 
 lexemeScrollbar = ttk.Scrollbar(lexemeTableView, orient="vertical", command=lexemeTree.yview)
 lexemeTree.configure(yscrollcommand=lexemeScrollbar.set)
@@ -357,7 +436,8 @@ lexemeTree.configure(yscrollcommand=lexemeScrollbar.set)
 lexemeTree.pack(side="left", fill="both", expand=True)
 lexemeScrollbar.pack(side="right", fill="y")
 
-
+# Add tooltip functionality to the lexeme table
+lexemeTooltip = TreeviewTooltip(lexemeTree)
 # ───────────────────────────────────────────────────────────────────────────────────────────────
 symbolTableView = tk.Frame(tableViews)
 symbolTableView.grid(row=0, column=1, sticky="nsew")
@@ -385,6 +465,8 @@ symbolTree.configure(yscrollcommand=symbolScrollbar.set)
 symbolTree.pack(side="left", fill="both", expand=True)
 symbolScrollbar.pack(side="right", fill="y")
 
+# Add tooltip functionality to the symbol table
+symbolTooltip = TreeviewTooltip(symbolTree)
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 # Center view
 executeButton = tk.Button(centerView, text="Execute", command=lambda: print("Executing..."))
