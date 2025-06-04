@@ -4,9 +4,15 @@ from tkinter import filedialog # For opening files
 import os
 import tkinter.font as tkfont
 
+# Declare important variables in which most functions will operate
+root = None
+lexemeTree = None
+symbolTree = None
+console = None
+
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 class CodeEditor(tk.Frame):
-    def __init__(self, parent, **kwargs):
+    def __init__(self, parent, root, **kwargs):
         super().__init__(parent)
         
         # Create line number text widget
@@ -375,7 +381,7 @@ def update_console(console, text):
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
 # Function to generate dummy data for tables
-def generate_dummy_data():
+def generate_dummy_data(lexemeTree, symbolTree, console):
     sample_data = []
     for i in range(20):
         sample_data.append((f"lexLONGTEXTEXAMPLE{i}", f"Additional Parameter Variable{i%3}", i+1))
@@ -398,161 +404,164 @@ def generate_dummy_data():
     )
     update_console(console, sample_really_long_multi_line_text)
 
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════
+# Main function to run the GUI (setups the GUI and starts the application)
+def run_gui():
+    root = tk.Tk()
+    root.title("LOLCODE Interpreter")
 
-# ═══════════════════════════════════════════════════════════════════════════════════════════════
-root = tk.Tk()
-root.title("LOLCODE Interpreter")
+    MIN_WIDTH = 1280 # Preferrably divisible by 5
+    MIN_HEIGHT = 720 
+    TABLE_VIEWS_FIXED_WIDTH = (MIN_WIDTH * 2) // 4  # Fixed width for table views
 
-MIN_WIDTH = 1280 # Preferrably divisible by 5
-MIN_HEIGHT = 720 
-TABLE_VIEWS_FIXED_WIDTH = (MIN_WIDTH * 2) // 4  # Fixed width for table views
+    # Set minimum size
+    root.minsize(MIN_WIDTH, MIN_HEIGHT)
+    root.geometry(f"{MIN_WIDTH}x{MIN_HEIGHT}") # Window size on launch
 
-# Set minimum size
-root.minsize(MIN_WIDTH, MIN_HEIGHT)
-root.geometry(f"{MIN_WIDTH}x{MIN_HEIGHT}") # Window size on launch
+    # ───────────────────────────────────────────────────────────────────────────────────────────────
+    # Create frames for different areas of the GUI and add them to the root (window)
+    # Top and bottom views should equally occupy the available space, whereas the center view should have a fixed height
+    topView = tk.Frame(root)
+    centerView = tk.Frame(root, height=50) 
+    bottomView = tk.Frame(root)
 
-# ───────────────────────────────────────────────────────────────────────────────────────────────
-# Create frames for different areas of the GUI and add them to the root (window)
-# Top and bottom views should equally occupy the available space, whereas the center view should have a fixed height
-topView = tk.Frame(root)
-centerView = tk.Frame(root, height=50) 
-bottomView = tk.Frame(root)
+    root.grid_rowconfigure(0, weight=1)  # Top view
+    root.grid_rowconfigure(1, weight=0)  # Center view
+    root.grid_rowconfigure(2, weight=1)  # Bottom view
+    root.grid_columnconfigure(0, weight=1)
 
-root.grid_rowconfigure(0, weight=1)  # Top view
-root.grid_rowconfigure(1, weight=0)  # Center view
-root.grid_rowconfigure(2, weight=1)  # Bottom view
-root.grid_columnconfigure(0, weight=1)
+    topView.grid(row=0, column=0, sticky="nsew")
+    centerView.grid(row=1, column=0, sticky="ew")
+    centerView.grid_propagate(False) 
+    bottomView.grid(row=2, column=0, sticky="nsew")
+    # ═══════════════════════════════════════════════════════════════════════════════════════════════
+    # Top view
+    topView.columnconfigure(0, weight=1)
+    topView.columnconfigure(1, weight=0, minsize=TABLE_VIEWS_FIXED_WIDTH)
+    topView.rowconfigure(0, weight=1)
+    # ───────────────────────────────────────────────────────────────────────────────────────────────
+    # Left side
+    codeEditorView = tk.Frame(topView)
+    codeEditorView.grid(row=0, column=0, sticky="nsew")
 
-topView.grid(row=0, column=0, sticky="nsew")
-centerView.grid(row=1, column=0, sticky="ew")
-centerView.grid_propagate(False) 
-bottomView.grid(row=2, column=0, sticky="nsew")
-# ═══════════════════════════════════════════════════════════════════════════════════════════════
-# Top view
-topView.columnconfigure(0, weight=1)
-topView.columnconfigure(1, weight=0, minsize=TABLE_VIEWS_FIXED_WIDTH)
-topView.rowconfigure(0, weight=1)
-# ───────────────────────────────────────────────────────────────────────────────────────────────
-# Left side
-codeEditorView = tk.Frame(topView)
-codeEditorView.grid(row=0, column=0, sticky="nsew")
+    # Grid configuration for the code editor view (top = file chooser, bottom = code editor)
+    codeEditorView.columnconfigure(0, weight=1)
+    codeEditorView.rowconfigure(0, weight=0)
+    codeEditorView.rowconfigure(1, weight=1)
 
-# Grid configuration for the code editor view (top = file chooser, bottom = code editor)
-codeEditorView.columnconfigure(0, weight=1)
-codeEditorView.rowconfigure(0, weight=0)
-codeEditorView.rowconfigure(1, weight=1)
+    # Bottom (code editor)
+    codeEditor = CodeEditor(codeEditorView, root, background="white")
+    codeEditor.grid(row=1, column=0, sticky="nsew")
 
-# Bottom (code editor)
-codeEditor = CodeEditor(codeEditorView, background="white")
-codeEditor.grid(row=1, column=0, sticky="nsew")
+    # Top (file chooser)
+    # Wrap in a frame to for ce the button to have a fixed height
+    fileChooserFrame = tk.Frame(codeEditorView, height=27)
+    fileChooserFrame.grid(row=0, column=0, sticky="ew")
+    fileChooserFrame.grid_propagate(False)  # Prevent resizing
 
-# Top (file chooser)
-# Wrap in a frame to for ce the button to have a fixed height
-fileChooserFrame = tk.Frame(codeEditorView, height=27)
-fileChooserFrame.grid(row=0, column=0, sticky="ew")
-fileChooserFrame.grid_propagate(False)  # Prevent resizing
+    fileChooserButton = tk.Button(fileChooserFrame, text="Open LOLCODE file", 
+                                  command=lambda: choose_file(fileChooserButton, codeEditor),
+                                # command=get_user_input, # For testing purposes 
+                                anchor="w")
+    fileChooserButton.place(x=0, y=0, relwidth=1, relheight=1)
 
-fileChooserButton = tk.Button(fileChooserFrame, text="Open LOLCODE file", 
-                            #   command=lambda: choose_file(fileChooserButton, codeEditor),
-                            command=get_user_input, # For testing purposes 
-                              anchor="w")
-fileChooserButton.place(x=0, y=0, relwidth=1, relheight=1)
+    # ───────────────────────────────────────────────────────────────────────────────────────────────
+    # Right side
+    tableViews = tk.Frame(topView)
+    tableViews.grid(row=0, column=1, sticky="ns")
 
-# ───────────────────────────────────────────────────────────────────────────────────────────────
-# Right side
-tableViews = tk.Frame(topView)
-tableViews.grid(row=0, column=1, sticky="ns")
+    tableViews.columnconfigure(0, weight=3)
+    tableViews.columnconfigure(1, weight=2)
+    tableViews.rowconfigure(0, weight=1)
 
-tableViews.columnconfigure(0, weight=3)
-tableViews.columnconfigure(1, weight=2)
-tableViews.rowconfigure(0, weight=1)
+    # -----------------------------------------------------------------------------------------------
+    # Left side of the right side
+    lexemeTableView = tk.Frame(tableViews)
+    lexemeTableView.grid(row=0, column=0, sticky="nsew")
 
-# -----------------------------------------------------------------------------------------------
-# Left side of the right side
-lexemeTableView = tk.Frame(tableViews)
-lexemeTableView.grid(row=0, column=0, sticky="nsew")
+    lexemeTableLabel = tk.Label(lexemeTableView, text="Lexeme Table")
+    lexemeTableLabel.pack(fill="x")
 
-lexemeTableLabel = tk.Label(lexemeTableView, text="Lexeme Table")
-lexemeTableLabel.pack(fill="x")
+    lexemeColumns = ("Lexeme", "Classification", "Line #")
+    lexemeTree = ttk.Treeview(lexemeTableView, columns=lexemeColumns, show="headings", height=10)
 
-lexemeColumns = ("Lexeme", "Classification", "Line #")
-lexemeTree = ttk.Treeview(lexemeTableView, columns=lexemeColumns, show="headings", height=10)
+    # Format column widths
+    LEXEME_TABLE_WIDTH = (TABLE_VIEWS_FIXED_WIDTH * 3) // 5
 
-# Format column widths
-LEXEME_TABLE_WIDTH = (TABLE_VIEWS_FIXED_WIDTH * 3) // 5
+    # First column
+    lexemeTree.heading(lexemeColumns[0], text=lexemeColumns[0])
+    lexemeTree.column(lexemeColumns[0], width=int(LEXEME_TABLE_WIDTH * 2 / 5), anchor="w")
 
-# First column
-lexemeTree.heading(lexemeColumns[0], text=lexemeColumns[0])
-lexemeTree.column(lexemeColumns[0], width=int(LEXEME_TABLE_WIDTH * 2 / 5), anchor="w")
+    # Second column
+    lexemeTree.heading(lexemeColumns[1], text=lexemeColumns[1])
+    lexemeTree.column(lexemeColumns[1], width=int(LEXEME_TABLE_WIDTH * 2 / 5), anchor="w")
 
-# Second column
-lexemeTree.heading(lexemeColumns[1], text=lexemeColumns[1])
-lexemeTree.column(lexemeColumns[1], width=int(LEXEME_TABLE_WIDTH * 2 / 5), anchor="w")
+    # Third column
+    lexemeTree.heading(lexemeColumns[2], text=lexemeColumns[2])
+    lexemeTree.column(lexemeColumns[2], width=int(LEXEME_TABLE_WIDTH * 1 / 5), anchor="center")
 
-# Third column
-lexemeTree.heading(lexemeColumns[2], text=lexemeColumns[2])
-lexemeTree.column(lexemeColumns[2], width=int(LEXEME_TABLE_WIDTH * 1 / 5), anchor="center")
+    lexemeScrollbar = ttk.Scrollbar(lexemeTableView, orient="vertical", command=lexemeTree.yview)
+    lexemeTree.configure(yscrollcommand=lexemeScrollbar.set)
 
-lexemeScrollbar = ttk.Scrollbar(lexemeTableView, orient="vertical", command=lexemeTree.yview)
-lexemeTree.configure(yscrollcommand=lexemeScrollbar.set)
+    lexemeTree.pack(side="left", fill="both", expand=True)
+    lexemeScrollbar.pack(side="right", fill="y")
 
-lexemeTree.pack(side="left", fill="both", expand=True)
-lexemeScrollbar.pack(side="right", fill="y")
+    # Add tooltip functionality to the lexeme table
+    lexemeTooltip = TreeviewTooltip(lexemeTree)
 
-# Add tooltip functionality to the lexeme table
-lexemeTooltip = TreeviewTooltip(lexemeTree)
+    # -----------------------------------------------------------------------------------------------
+    # Right side of the right side
+    symbolTableView = tk.Frame(tableViews)
+    symbolTableView.grid(row=0, column=1, sticky="nsew")
 
-# -----------------------------------------------------------------------------------------------
-# Right side of the right side
-symbolTableView = tk.Frame(tableViews)
-symbolTableView.grid(row=0, column=1, sticky="nsew")
+    symbolTableLabel = tk.Label(symbolTableView, text="Symbol Table")
+    symbolTableLabel.pack(fill="x")
 
-symbolTableLabel = tk.Label(symbolTableView, text="Symbol Table")
-symbolTableLabel.pack(fill="x")
+    symbolColumns = ("Symbol", "Value")
+    symbolTree = ttk.Treeview(symbolTableView, columns=symbolColumns, show="headings", height=10)
 
-symbolColumns = ("Symbol", "Value")
-symbolTree = ttk.Treeview(symbolTableView, columns=symbolColumns, show="headings", height=10)
+    # Format column widths
+    SYMBOL_TABLE_WIDTH = (TABLE_VIEWS_FIXED_WIDTH * 2) // 5
 
-# Format column widths
-SYMBOL_TABLE_WIDTH = (TABLE_VIEWS_FIXED_WIDTH * 2) // 5
+    # First column
+    symbolTree.heading(symbolColumns[0], text=symbolColumns[0])
+    symbolTree.column(symbolColumns[0], width=int(SYMBOL_TABLE_WIDTH / 2), anchor="w")
 
-# First column
-symbolTree.heading(symbolColumns[0], text=symbolColumns[0])
-symbolTree.column(symbolColumns[0], width=int(SYMBOL_TABLE_WIDTH / 2), anchor="w")
+    # Second column
+    symbolTree.heading(symbolColumns[1], text=symbolColumns[1])
+    symbolTree.column(symbolColumns[1], width=int(SYMBOL_TABLE_WIDTH / 2), anchor="w")
 
-# Second column
-symbolTree.heading(symbolColumns[1], text=symbolColumns[1])
-symbolTree.column(symbolColumns[1], width=int(SYMBOL_TABLE_WIDTH / 2), anchor="w")
+    symbolScrollbar = ttk.Scrollbar(symbolTableView, orient="vertical", command=symbolTree.yview)
+    symbolTree.configure(yscrollcommand=symbolScrollbar.set)
 
-symbolScrollbar = ttk.Scrollbar(symbolTableView, orient="vertical", command=symbolTree.yview)
-symbolTree.configure(yscrollcommand=symbolScrollbar.set)
+    symbolTree.pack(side="left", fill="both", expand=True)
+    symbolScrollbar.pack(side="right", fill="y")
 
-symbolTree.pack(side="left", fill="both", expand=True)
-symbolScrollbar.pack(side="right", fill="y")
+    # Add tooltip functionality to the symbol table
+    symbolTooltip = TreeviewTooltip(symbolTree)
+    # ═══════════════════════════════════════════════════════════════════════════════════════════════
+    # Center view
+    executeButton = tk.Button(centerView, text="Execute", command=lambda: print("Executing..."))
+    executeButton.pack(fill = "both", expand=True, padx=0, pady=(5, 5))
 
-# Add tooltip functionality to the symbol table
-symbolTooltip = TreeviewTooltip(symbolTree)
-# ═══════════════════════════════════════════════════════════════════════════════════════════════
-# Center view
-executeButton = tk.Button(centerView, text="Execute", command=lambda: print("Executing..."))
-executeButton.pack(fill = "both", expand=True, padx=0, pady=(5, 5))
+    # ═══════════════════════════════════════════════════════════════════════════════════════════════
+    # Bottom view
+    # This is the console area where output will be displayed
+    console = tk.Text(bottomView, state="disabled", wrap="word", 
+                    bg="#f0f0f0", fg="#000000", font=("Courier New", 10),  
+                    padx=10, pady=10, cursor="arrow",
+                    borderwidth=0, 
+                    highlightthickness=0, 
+                    #   spacing1=0,  # Space above each line
+                    #   spacing2=0,  # Space between wrapped lines
+                    spacing3=0  # Space after last line
+        )
+    console.pack(fill="both", expand=True)    
 
-# ═══════════════════════════════════════════════════════════════════════════════════════════════
-# Bottom view
-# This is the console area where output will be displayed
-console = tk.Text(bottomView, state="disabled", wrap="word", 
-                  bg="#f0f0f0", fg="#000000", font=("Courier New", 10),  
-                  padx=10, pady=10, cursor="arrow",
-                  borderwidth=0, 
-                  highlightthickness=0, 
-                #   spacing1=0,  # Space above each line
-                #   spacing2=0,  # Space between wrapped lines
-                  spacing3=0  # Space after last line
-    )
-console.pack(fill="both", expand=True)    
+    # ───────────────────────────────────────────────────────────────────────────────────────────────
+    generate_dummy_data(lexemeTree, symbolTree, console) # Delete this later
 
-# ───────────────────────────────────────────────────────────────────────────────────────────────
-generate_dummy_data()
+    root.mainloop()
 
-
-root.mainloop()
+if __name__ == "__main__":
+    run_gui()
