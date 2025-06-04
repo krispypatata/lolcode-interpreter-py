@@ -321,6 +321,22 @@ def update_table_contents(table, data):
         table.insert("", "end", values=row)
 
 
+# ───────────────────────────────────────────────────────────────────────────────────────────────
+# Function to generate dummy data for tables
+def generate_dummy_date_for_tables():
+    sample_data = []
+    for i in range(20):
+        sample_data.append((f"lexLONGTEXTEXAMPLE{i}", f"Additional Parameter Variable{i%3}", i+1))
+    
+    update_table_contents(lexemeTree, sample_data)
+
+    sample_data = []
+    for i in range(20):
+        sample_data.append((f"symbolsymbol{i}", f"value{i}"))
+
+    update_table_contents(symbolTree, sample_data)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 root = tk.Tk()
 root.title("LOLCODE Interpreter")
@@ -387,7 +403,8 @@ tableViews.columnconfigure(0, weight=3)
 tableViews.columnconfigure(1, weight=2)
 tableViews.rowconfigure(0, weight=1)
 
-# ───────────────────────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------------------------
+# Left side of the right side
 lexemeTableView = tk.Frame(tableViews)
 lexemeTableView.grid(row=0, column=0, sticky="nsew")
 
@@ -397,6 +414,7 @@ lexemeTableLabel.pack(fill="x")
 lexemeColumns = ("Lexeme", "Classification", "Line #")
 lexemeTree = ttk.Treeview(lexemeTableView, columns=lexemeColumns, show="headings", height=10)
 
+# Format column widths
 LEXEME_TABLE_WIDTH = (TABLE_VIEWS_FIXED_WIDTH * 3) // 5
 
 # First column
@@ -411,17 +429,6 @@ lexemeTree.column(lexemeColumns[1], width=int(LEXEME_TABLE_WIDTH * 2 / 5), ancho
 lexemeTree.heading(lexemeColumns[2], text=lexemeColumns[2])
 lexemeTree.column(lexemeColumns[2], width=int(LEXEME_TABLE_WIDTH * 1 / 5), anchor="center")
 
-############################################################################################
-# DELETE THIS LATER
-# Sample data
-sample_data = []
-for i in range(20):
-    # lexemeTree.insert("", "end", values=(f"lexLONGTEXTEXAMPLE{i}", f"Additional Parameter Variable{i%3}", i+1))
-    sample_data.append((f"lexLONGTEXTEXAMPLE{i}", f"Additional Parameter Variable{i%3}", i+1))
-# Use the function to update the table contents
-update_table_contents(lexemeTree, sample_data)
-############################################################################################
-
 lexemeScrollbar = ttk.Scrollbar(lexemeTableView, orient="vertical", command=lexemeTree.yview)
 lexemeTree.configure(yscrollcommand=lexemeScrollbar.set)
 
@@ -430,7 +437,9 @@ lexemeScrollbar.pack(side="right", fill="y")
 
 # Add tooltip functionality to the lexeme table
 lexemeTooltip = TreeviewTooltip(lexemeTree)
-# ───────────────────────────────────────────────────────────────────────────────────────────────
+
+# -----------------------------------------------------------------------------------------------
+# Right side of the right side
 symbolTableView = tk.Frame(tableViews)
 symbolTableView.grid(row=0, column=1, sticky="nsew")
 
@@ -440,22 +449,16 @@ symbolTableLabel.pack(fill="x")
 symbolColumns = ("Symbol", "Value")
 symbolTree = ttk.Treeview(symbolTableView, columns=symbolColumns, show="headings", height=10)
 
+# Format column widths
 SYMBOL_TABLE_WIDTH = (TABLE_VIEWS_FIXED_WIDTH * 2) // 5
 
-for col in symbolColumns:
-    symbolTree.heading(col, text=col)
-    symbolTree.column(col, width=int(SYMBOL_TABLE_WIDTH / 2))
-    # symbolTree.column(col, width=120, anchor="center")
+# First column
+symbolTree.heading(symbolColumns[0], text=symbolColumns[0])
+symbolTree.column(symbolColumns[0], width=int(SYMBOL_TABLE_WIDTH / 2), anchor="w")
 
-############################################################################################
-# DELETE THIS LATER
-# Sample data
-sample_data = []
-for i in range(20):
-    sample_data.append((f"symbolsymbol{i}", f"value{i}"))
-# Use the function to update the table contents
-update_table_contents(symbolTree, sample_data)
-############################################################################################
+# Second column
+symbolTree.heading(symbolColumns[1], text=symbolColumns[1])
+symbolTree.column(symbolColumns[1], width=int(SYMBOL_TABLE_WIDTH / 2), anchor="w")
 
 symbolScrollbar = ttk.Scrollbar(symbolTableView, orient="vertical", command=symbolTree.yview)
 symbolTree.configure(yscrollcommand=symbolScrollbar.set)
@@ -476,4 +479,7 @@ console = Terminal(bottomView)
 console.pack(fill="both", expand=True)
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
+generate_dummy_date_for_tables()
+
+
 root.mainloop()
