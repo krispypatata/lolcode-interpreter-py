@@ -4,8 +4,6 @@ from tkinter import filedialog # For opening files
 import os
 import tkinter.font as tkfont
 
-from tkterminal import Terminal
-
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 class CodeEditor(tk.Frame):
     def __init__(self, parent, **kwargs):
@@ -357,6 +355,25 @@ def get_user_input():
     return result
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
+# Function to update the contents of the console
+def update_console(console, text):
+    """
+    Update the contents of the console with new text.
+    """
+    # Temporarily enable editing
+    console.config(state="normal")          
+
+    # Clear the console
+    console.delete("1.0", "end")
+
+    # Insert the new text
+    console.insert("end", text + "\n")
+    console.see("end") # Scroll to the end                     
+
+    # Disable editing again
+    console.config(state="disabled")    
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────
 # Function to generate dummy data for tables
 def generate_dummy_date_for_tables():
     sample_data = []
@@ -508,12 +525,32 @@ symbolTooltip = TreeviewTooltip(symbolTree)
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 # Center view
 executeButton = tk.Button(centerView, text="Execute", command=lambda: print("Executing..."))
-executeButton.pack(fill = "both", expand=True, padx=5, pady=5)
+executeButton.pack(fill = "both", expand=True, padx=0, pady=(5, 5))
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 # Bottom view
-console = Terminal(bottomView)
-console.pack(fill="both", expand=True)
+# This is the console area where output will be displayed
+console = tk.Text(bottomView, state="disabled", wrap="word", 
+                  bg="#f0f0f0", fg="#000000", font=("Courier New", 10),  
+                  padx=10, pady=10, cursor="arrow",
+                  borderwidth=0, 
+                  highlightthickness=0, 
+                #   spacing1=0,  # Space above each line
+                #   spacing2=0,  # Space between wrapped lines
+                  spacing3=0  # Space after last line
+    )
+console.pack(fill="both", expand=True)    
+
+sample_really_long_multi_line_text = (
+    "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+    "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+    "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."  
+    "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+    "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+    "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+)
+update_console(console, sample_really_long_multi_line_text)
+
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
 generate_dummy_date_for_tables()
