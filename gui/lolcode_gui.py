@@ -320,6 +320,41 @@ def update_table_contents(table, data):
     for row in data:
         table.insert("", "end", values=row)
 
+# ───────────────────────────────────────────────────────────────────────────────────────────────
+# Function for popping up a window to get user input
+def get_user_input():
+    def clear_input():
+        userInput.delete(0, tk.END)
+
+    def submit_input():
+        nonlocal result
+        result = userInput.get()
+        popup.destroy()
+
+    result = None
+    popup = tk.Toplevel(root)
+    popup.title("User Input")
+    popup.resizable(False, False)  # Prevent window resizing and maximizing
+    popup.grab_set()  # Make popup modal
+
+    tk.Label(popup, text="Enter something:").pack(pady=10)
+
+    userInput = tk.Entry(popup, 
+                        #  width=30  # Optional (to widen the entire popup window)
+                         )
+    userInput.pack(padx=10, pady=5, fill="x")
+
+    buttonFrame = tk.Frame(popup)
+    buttonFrame.pack(pady=10)
+
+    clearBtn = tk.Button(buttonFrame, text="Clear", command=clear_input)
+    clearBtn.pack(side="left", padx=10, ipadx=5, ipady=5)
+
+    submitBtn = tk.Button(buttonFrame, text="Submit", command=submit_input)
+    submitBtn.pack(side="left", padx=10, ipadx=5, ipady=5)
+
+    popup.wait_window()  # Wait until popup closes
+    return result
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
 # Function to generate dummy data for tables
@@ -391,7 +426,9 @@ fileChooserFrame.grid(row=0, column=0, sticky="ew")
 fileChooserFrame.grid_propagate(False)  # Prevent resizing
 
 fileChooserButton = tk.Button(fileChooserFrame, text="Open LOLCODE file", 
-                              command=lambda: choose_file(fileChooserButton, codeEditor), anchor="w")
+                            #   command=lambda: choose_file(fileChooserButton, codeEditor),
+                            command=get_user_input, # For testing purposes 
+                              anchor="w")
 fileChooserButton.place(x=0, y=0, relwidth=1, relheight=1)
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
