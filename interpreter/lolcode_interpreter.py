@@ -440,10 +440,9 @@ class Interpreter:
     # If no GUI is used, we can use the input function directly
     # Otherwise, we'll use a tkinter popup window to get user input
       if globals.no_gui:
-        user_input_value = str(input("Enter a value: "))
+        user_input_value = str(input())
         user_input_value = " " + user_input_value + " "
       else:
-        print("Enter a value:", end="")
         user_input_value = " " + get_user_input() + " "
         print(user_input_value)
 
