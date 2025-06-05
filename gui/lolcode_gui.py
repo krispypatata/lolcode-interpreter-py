@@ -289,6 +289,7 @@ class TreeviewTooltip:
         self.current_item = None
         self.current_column = None
 
+
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 # Function to choose a file and load its content into the code editor
 # Open a file dialog to choose a LOLCODE file and load its content into the code editor.
