@@ -15,42 +15,99 @@ lexemeTree = None
 symbolTree = None
 console = None
 
+# GUI Color constants
+_BACKGROUND = "#0d1117"
+_SECONDARY_BACKGROUND = "#161b22"
+_BORDER = "#30363d"
+_TEXT = "#c9d1d9"
+_TEXT_MUTED = "#8b949e"
+_ACCENT = "#58a6ff"
+# _DARK_ACCENT = "#112240"
+_DARK_ACCENT = "#134C61"
+_SELECT_ACCENT = "#134C61"
+_GREEN = "#238636"
+_RED = "#f85149"
+_YELLOW = "#e3b341"
+_PURPLE = "#a371f7"
+
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 # Class to create a code editor with line numbers, scrollbars, and context menu/right-click options
 class CodeEditor(tk.Frame):
     def __init__(self, parent, root, **kwargs):
         super().__init__(parent)
+
+        self.config(bg=_BACKGROUND)
         
         # Create line number text widget
         self.lineNumbers = tk.Text(self, width=4, padx=3, takefocus=0,
-                                   border=0, state='disabled', wrap='none',
-                                   background='#f0f0f0', foreground='#666666')
-        
+                                   border=0, state='disabled', wrap='none', cursor='arrow', borderwidth=0, 
+                                   highlightthickness=0, 
+                                   background=_BACKGROUND, foreground=_TEXT,
+                                   selectbackground=_BACKGROUND, selectforeground=_TEXT, inactiveselectbackground=_BACKGROUND,
+                                )
+
         # Create main text widget
-        self.textWidget = tk.Text(self, wrap='none', **kwargs)
+        self.textWidget = tk.Text(self, wrap='none', **kwargs, 
+                                  background=_SECONDARY_BACKGROUND, foreground=_TEXT, insertbackground=_TEXT,
+                                  selectbackground=_SELECT_ACCENT, selectforeground=_TEXT, inactiveselectbackground=_SELECT_ACCENT,
+                                  padx=5, pady=5, borderwidth=0, highlightthickness=0,
+                                )
         
+        # Disable all interaction with the line numbers section
+        # <Button-1> = clicking, <MouseWheel>   = scroll (Windows/macOS), <Button-4/5>   = scroll up/down (Linux)
+        for event in ['<Button-1>', '<MouseWheel>', '<Button-4>', '<Button-5>']:
+            self.lineNumbers.bind(event, lambda e: 'break')
+
+        # Create divider
+        self.divider_frame = tk.Frame(self, width=1, bg=_BORDER)
+        self.divider_frame.grid_propagate(False)
+
+        # Grid layout
+        self.lineNumbers.grid(row=0, column=0, sticky='ns')
+        self.divider_frame.grid(row=0, column=1, sticky='ns')
+        self.textWidget.grid(row=0, column=2, sticky='nsew')
+        
+        # Configure grid weights
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(2, weight=1)
+
         # Create scrollbars
         self.verticalScrollbar = ttk.Scrollbar(self, orient='vertical')
         self.horizontalScrollbar = ttk.Scrollbar(self, orient='horizontal')
 
         # Initialize scrollbars
-        self.verticalScrollbar.grid(row=0, column=2, sticky='ns')
-        self.horizontalScrollbar.grid(row=1, column=1, sticky='ew')
+        self.verticalScrollbar.grid(row=0, column=3, sticky='ns')
+        self.horizontalScrollbar.grid(row=1, column=2, sticky='ew')
         
+        # Track last line count to avoid unnecessary updates when scrolling
+        self.last_line_count = 1 
+
         # Configure scrollbar commands
         self.verticalScrollbar.config(command=self.on_scrollbar)
         self.horizontalScrollbar.config(command=self.textWidget.xview)
         self.textWidget.config(yscrollcommand=self.on_textscroll)
         self.textWidget.config(xscrollcommand=self.horizontalScrollbar.set)
         
-        # Grid layout
-        self.lineNumbers.grid(row=0, column=0, sticky='ns')
-        self.textWidget.grid(row=0, column=1, sticky='nsew')
-        
-        # Configure grid weights
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
-        
+        # Configure scrollbar styling using ttk.Style
+        scrollbarStyle = ttk.Style()
+        for component in ['Vertical.TScrollbar', 'Horizontal.TScrollbar']:
+            scrollbarStyle.configure(component,
+                background=_BORDER,
+                troughcolor=_SECONDARY_BACKGROUND,
+                bordercolor=_SECONDARY_BACKGROUND,
+                darkcolor=_SECONDARY_BACKGROUND,
+                lightcolor=_SECONDARY_BACKGROUND,
+                arrowcolor=_TEXT_MUTED,
+                gripcount=0,
+                border = 0,
+                relief='flat',
+            )
+
+            scrollbarStyle.map(component,
+                background=[('active', _BORDER), ('pressed', _BORDER)],
+                arrowcolor=[('active', _DARK_ACCENT), ('pressed', _DARK_ACCENT)],
+            )
+
         # Bind events
         self.textWidget.bind('<Key>', self.on_content_changed)
         self.textWidget.bind('<Button-1>', self.on_left_click)
@@ -70,7 +127,8 @@ class CodeEditor(tk.Frame):
         self.update_line_numbers()
         
         # Create context menu
-        self.contextMenu = tk.Menu(self, tearoff=0)
+        self.contextMenu = tk.Menu(self, tearoff=0, 
+                                   bg=_SECONDARY_BACKGROUND, fg=_TEXT, activebackground=_DARK_ACCENT, activeforeground=_TEXT)
         self.contextMenu.add_command(label="Copy", command=self.copy_text, accelerator="Ctrl+C")
         self.contextMenu.add_command(label="Cut", command=self.cut_text, accelerator="Ctrl+X")
         self.contextMenu.add_command(label="Paste", command=self.paste_text, accelerator="Ctrl+V")
@@ -79,7 +137,7 @@ class CodeEditor(tk.Frame):
 
         # Bind mouse click outside the context menu (right click menu) to hide it (so it doesn't stay open)
         root.bind('<Button-1>', self.hide_context_menu)
-
+    
     # Handle vertical scrollbar movement
     def on_scrollbar(self, *args):
         self.textWidget.yview(*args)
@@ -97,7 +155,7 @@ class CodeEditor(tk.Frame):
     # Handle left click events
     def on_left_click(self, event=None):
         self.hide_context_menu()
-        self.after_idle(self.update_line_numbers)
+        # self.after_idle(self.update_line_numbers)
     
     # Handle content changes
     def on_content_changed(self, event=None):
@@ -105,17 +163,28 @@ class CodeEditor(tk.Frame):
     
     # Update line numbers display
     def update_line_numbers(self):
-        self.lineNumbers.config(state='normal')
-        self.lineNumbers.delete('1.0', tk.END)
+        # Get current number of lines in text widget
+        current_line_count = int(self.textWidget.index(tk.END).split('.')[0])
         
-        # Get number of lines in text widget
-        end_line = int(self.textWidget.index(tk.END).split('.')[0])
-        
-        # Generate line numbers
-        lineNumbersText = '\n'.join(str(i) for i in range(1, end_line))
-        self.lineNumbers.insert('1.0', lineNumbersText)
-        
-        self.lineNumbers.config(state='disabled')
+        # Only update if the line count has actually changed
+        if current_line_count != self.last_line_count:
+            # Store the current scroll position of the main text widget
+            current_scroll_position = self.textWidget.yview()
+            
+            self.lineNumbers.config(state='normal')
+            self.lineNumbers.delete('1.0', tk.END)
+            
+            # Generate line numbers
+            lineNumbersText = '\n'.join(str(i) for i in range(1, current_line_count))
+            self.lineNumbers.insert('1.0', lineNumbersText)
+            
+            self.lineNumbers.config(state='disabled')
+            
+            # Restore the scroll position to match the main text widget
+            self.lineNumbers.yview_moveto(current_scroll_position[0])
+            
+            # Update the tracked line count
+            self.last_line_count = current_line_count
 
     # Show right-click context menu
     def show_context_menu(self, event):
@@ -341,24 +410,29 @@ def get_user_input():
 
     result = None
     popup = tk.Toplevel(root)
+    popup.configure(bg=_BACKGROUND)
     popup.title("User Input")
     popup.resizable(False, False)  # Prevent window resizing and maximizing
     popup.grab_set()  # Make popup modal
 
-    tk.Label(popup, text="Enter something:").pack(pady=10)
+    tk.Label(popup, text="Enter something:", 
+             bg=_BACKGROUND, fg=_TEXT).pack(pady=10)
 
     userInput = tk.Entry(popup, 
-                        #  width=30  # Optional (to widen the entire popup window)
+                        #  width=30  # Optional (to widen the entire popup window)'
+                        bg=_SECONDARY_BACKGROUND, fg=_TEXT, insertbackground=_TEXT
                          )
     userInput.pack(padx=10, pady=5, fill="x")
 
-    buttonFrame = tk.Frame(popup)
+    buttonFrame = tk.Frame(popup, bg=_BACKGROUND)
     buttonFrame.pack(pady=10)
 
-    clearBtn = tk.Button(buttonFrame, text="Clear", command=clear_input)
+    clearBtn = tk.Button(buttonFrame, text="Clear", command=clear_input,
+                         bg=_SECONDARY_BACKGROUND, fg=_TEXT, activebackground=_ACCENT, activeforeground=_TEXT)
     clearBtn.pack(side="left", padx=10, ipadx=5, ipady=5)
 
-    submitBtn = tk.Button(buttonFrame, text="Submit", command=submit_input)
+    submitBtn = tk.Button(buttonFrame, text="Submit", command=submit_input,
+                          bg=_SECONDARY_BACKGROUND, fg=_TEXT, activebackground=_ACCENT, activeforeground=_TEXT)
     submitBtn.pack(side="left", padx=10, ipadx=5, ipady=5)
 
     popup.wait_window()  # Wait until popup closes
@@ -409,6 +483,31 @@ def redirect_python_output_to_custom_console(text_widget):
     sys.stderr = Redirect(text_widget)
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
+# Function to allow right-clicking in the console to copy selected text to clipboard
+def right_click_to_copy_console_text(event, console):
+    try:
+        # Check if there's a selection
+        if console.tag_ranges(tk.SEL):
+            # Get selected text
+            selected_text = console.get(tk.SEL_FIRST, tk.SEL_LAST)
+            
+            # Copy to clipboard (works on cross-platform)
+            console.clipboard_clear()
+            console.clipboard_append(selected_text)
+            
+            # Clear selection (works on cross-platform)
+            console.tag_remove(tk.SEL, "1.0", tk.END)
+            
+            # On macOS, we need to update the clipboard immediately
+            if sys.platform == 'darwin':
+                console.update()
+            
+        # Prevent default right-click behavior
+        return "break"
+    except tk.TclError:
+        return "break"
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────
 # Function to generate dummy data for gui
 def generate_dummy_data(lexemeTree, symbolTree, console):
     sample_data = []
@@ -432,13 +531,13 @@ def generate_dummy_data(lexemeTree, symbolTree, console):
         "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
     )
     print(sample_really_long_multi_line_text)
-
-
+    
 # ═══════════════════════════════════════════════════════════════════════════════════════════════════
 # Main function to run the GUI (setups the GUI and starts the application)
 def run_gui():
     root = tk.Tk()
     root.title("LOLCODE Interpreter")
+    root.configure(bg=_BACKGROUND)
 
     MIN_WIDTH = 1280 # Preferrably divisible by 5
     MIN_HEIGHT = 720 
@@ -451,9 +550,12 @@ def run_gui():
     # ───────────────────────────────────────────────────────────────────────────────────────────────
     # Create frames for different areas of the GUI and add them to the root (window)
     # Top and bottom views should equally occupy the available space, whereas the center view should have a fixed height
-    topView = tk.Frame(root)
-    centerView = tk.Frame(root, height=50) 
-    bottomView = tk.Frame(root)
+    topView = tk.Frame(root, 
+                       bg=_BACKGROUND)
+    centerView = tk.Frame(root, height=50, 
+                          bg=_BACKGROUND) 
+    bottomView = tk.Frame(root, 
+                          bg=_BACKGROUND)
 
     root.grid_rowconfigure(0, weight=1)  # Top view
     root.grid_rowconfigure(1, weight=0)  # Center view
@@ -471,7 +573,8 @@ def run_gui():
     topView.rowconfigure(0, weight=1)
     # ───────────────────────────────────────────────────────────────────────────────────────────────
     # Left side
-    codeEditorView = tk.Frame(topView)
+    codeEditorView = tk.Frame(topView, 
+                              bg=_BACKGROUND)
     codeEditorView.grid(row=0, column=0, sticky="nsew")
 
     # Grid configuration for the code editor view (top = file chooser, bottom = code editor)
@@ -480,24 +583,30 @@ def run_gui():
     codeEditorView.rowconfigure(1, weight=1)
 
     # Bottom (code editor)
-    codeEditor = CodeEditor(codeEditorView, root, background="white")
+    codeEditor = CodeEditor(codeEditorView, root)
     codeEditor.grid(row=1, column=0, sticky="nsew")
 
     # Top (file chooser)
     # Wrap in a frame to for ce the button to have a fixed height
-    fileChooserFrame = tk.Frame(codeEditorView, height=27)
+    fileChooserFrame = tk.Frame(codeEditorView, height=27, 
+                                bg=_BACKGROUND)
     fileChooserFrame.grid(row=0, column=0, sticky="ew")
     fileChooserFrame.grid_propagate(False)  # Prevent resizing
 
     fileChooserButton = tk.Button(fileChooserFrame, text="Open LOLCODE file", 
                                   command=lambda: choose_file(fileChooserButton, codeEditor),
                                 # command=get_user_input, # For testing purposes 
-                                anchor="w")
+                                anchor="w",
+                                bg=_BACKGROUND, fg=_TEXT, activebackground=_DARK_ACCENT, 
+                                activeforeground=_TEXT, 
+                                borderwidth=0, highlightthickness=0
+                                )
     fileChooserButton.place(x=0, y=0, relwidth=1, relheight=1)
 
     # ───────────────────────────────────────────────────────────────────────────────────────────────
     # Right side
-    tableViews = tk.Frame(topView)
+    tableViews = tk.Frame(topView, 
+                          bg=_BACKGROUND)
     tableViews.grid(row=0, column=1, sticky="ns")
 
     tableViews.columnconfigure(0, weight=3)
@@ -506,10 +615,12 @@ def run_gui():
 
     # -----------------------------------------------------------------------------------------------
     # Left side of the right side
-    lexemeTableView = tk.Frame(tableViews)
+    lexemeTableView = tk.Frame(tableViews, 
+                               bg=_BACKGROUND)
     lexemeTableView.grid(row=0, column=0, sticky="nsew")
 
-    lexemeTableLabel = tk.Label(lexemeTableView, text="Lexeme Table")
+    lexemeTableLabel = tk.Label(lexemeTableView, text="Lexeme Table", 
+                                bg=_BACKGROUND, fg=_TEXT)
     lexemeTableLabel.pack(fill="x")
 
     lexemeColumns = ("Lexeme", "Classification", "Line #")
@@ -541,10 +652,12 @@ def run_gui():
 
     # -----------------------------------------------------------------------------------------------
     # Right side of the right side
-    symbolTableView = tk.Frame(tableViews)
+    symbolTableView = tk.Frame(tableViews, 
+                               bg=_BACKGROUND)
     symbolTableView.grid(row=0, column=1, sticky="nsew")
 
-    symbolTableLabel = tk.Label(symbolTableView, text="Symbol Table")
+    symbolTableLabel = tk.Label(symbolTableView, text="Symbol Table",
+                                bg=_BACKGROUND, fg=_TEXT)
     symbolTableLabel.pack(fill="x")
 
     symbolColumns = ("Symbol", "Value")
@@ -569,17 +682,55 @@ def run_gui():
 
     # Add tooltip functionality to the symbol table
     symbolTooltip = TreeviewTooltip(symbolTree)
+
+    # -----------------------------------------------------------------------------------------------
+    # Configure styling for the tables
+    tableStyle = ttk.Style()
+
+    tableStyle.configure('Treeview',
+        background=_SECONDARY_BACKGROUND,
+        foreground=_TEXT,
+        fieldbackground=_SECONDARY_BACKGROUND,
+        selectbackground=_SELECT_ACCENT,
+        selectforeground=_TEXT,
+        borderwidth=0
+    )
+
+    tableStyle.configure('Treeview.Heading',
+        background=_BACKGROUND,
+        foreground=_TEXT,
+        relief='flat',
+        borderwidth=1,
+    )
+
+    tableStyle.map('Treeview',
+        background=[('selected', _SELECT_ACCENT)], 
+        foreground=[('selected', _TEXT)],
+    )
+
+    tableStyle.map('Treeview.Heading',
+        background=[('active', _SELECT_ACCENT), ('pressed', _SELECT_ACCENT)],
+        foreground=[('active', _TEXT), ('pressed', _TEXT)],
+    )
+
     # ═══════════════════════════════════════════════════════════════════════════════════════════════
     # Center view
-    executeButton = tk.Button(centerView, text="Execute", 
+    executeButton = tk.Button(centerView, text="EXECUTE LOLCODE", 
+                              bg=_BACKGROUND, fg=_TEXT, activebackground=_DARK_ACCENT, activeforeground=_TEXT,
+                              border=0, highlightthickness=0,
+                              font=("TkDefaultFont", 12),
                               command=lambda: execute_code(codeEditor, console, lexemeTree, symbolTree))
-    executeButton.pack(fill = "both", expand=True, padx=0, pady=(5, 5))
+    executeButton.pack(fill = "both", expand=True, 
+                       padx=0, pady=0)
 
     # ═══════════════════════════════════════════════════════════════════════════════════════════════
     # Bottom view
     # This is the console area where output will be displayed
     console = tk.Text(bottomView, state="disabled", wrap="word", 
-                    bg="#f0f0f0", fg="#000000", font=("Courier New", 15),  
+                    bg=_SECONDARY_BACKGROUND, fg=_TEXT, insertbackground=_TEXT,
+                    selectbackground=_SELECT_ACCENT, selectforeground=_TEXT,
+                    inactiveselectbackground=_SELECT_ACCENT,
+                    font=("Courier New", 15),  
                     padx=10, pady=10, cursor="arrow",
                     borderwidth=0, 
                     highlightthickness=0, 
@@ -588,6 +739,9 @@ def run_gui():
                     spacing3=0  # Space after last line
         )
     console.pack(fill="both", expand=True)    
+
+    # Allows copying of text from the console by right-clicking selected text
+    console.bind("<Button-3>", lambda event: right_click_to_copy_console_text(event, console))
 
     # ───────────────────────────────────────────────────────────────────────────────────────────────
     # Make sure to redirect Python's standard output to the custom console
