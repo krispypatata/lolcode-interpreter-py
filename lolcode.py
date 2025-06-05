@@ -12,6 +12,9 @@ globals.symbol_table.set("IT", Number(0))
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 # Function to run the LOLCODE interpreter
 def run_lolcode(inputText=None):
+    if inputText is None:
+        return None, None
+
     # print('Input Text:')
     # print(inputText)
 
@@ -105,4 +108,8 @@ def test_run_lolcode():
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 # For testing the implementation of the program
 if __name__ == '__main__':
-    test_run_lolcode() # Uncomment to run the tests on the terminal-based interpreter
+    # test_run_lolcode() # Uncomment to run the tests on the terminal-based interpreter
+
+    # Run the GUI-based interpreter
+    from gui.lolcode_gui import run_gui
+    run_gui()

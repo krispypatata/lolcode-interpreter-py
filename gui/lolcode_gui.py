@@ -5,13 +5,15 @@ import os
 import tkinter.font as tkfont
 import sys
 
+# Add the project root directory to Python path (to use globals.py when running just this gui)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from common import globals
+
 # Declare important variables in which most functions will operate
 root = None
 lexemeTree = None
 symbolTree = None
 console = None
-
-
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 # Class to create a code editor with line numbers, scrollbars, and context menu/right-click options
 class CodeEditor(tk.Frame):
@@ -364,25 +366,6 @@ def get_user_input():
     return result
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
-# Function to update the contents of the console
-def update_console(console, text):
-    """
-    Update the contents of the console with new text.
-    """
-    # Temporarily enable editing
-    console.config(state="normal")          
-
-    # Clear the console
-    console.delete("1.0", "end")
-
-    # Insert the new text
-    console.insert("end", text + "\n")
-    console.see("end") # Scroll to the end                     
-
-    # Disable editing again
-    console.config(state="disabled")    
-
-# ───────────────────────────────────────────────────────────────────────────────────────────────
 # Function to run when the execute button is clicked
 def execute_code(codeEditor, console, lexemeTree, symbolTree):
     """
@@ -392,21 +375,40 @@ def execute_code(codeEditor, console, lexemeTree, symbolTree):
     code = codeEditor.get("1.0", "end-1c")  # Get all text, excluding the last newline character
 
     # Clear the console before executing new code
+    console.config(state="normal")
     console.delete("1.0", "end")
+    console.config(state="disabled")
+
+    # Check if the code is empty
+    if not code.strip():
+        print("No code to execute.")
+        return
 
     # Run the LOLCODE interpreter
+    from lolcode import handle_run_lolcode
+    handle_run_lolcode(code)
+
+    update_table_contents(lexemeTree, globals.tokens)  # Update lexeme table with tokens
+    update_table_contents(symbolTree, globals.symbol_table.symbols.items())  # Update symbol table with variables and functions
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
 # Function to redirect everything printed in Python console to a custome console (text widget)
 def redirect_python_output_to_custom_console(text_widget):
     class Redirect:
+        def __init__(self, text_widget):
+            self.text_widget = text_widget
+            
         def write(self, string):
-            text_widget.insert(tk.END, string)
-            text_widget.see(tk.END)
-        def flush(self): pass
+            self.text_widget.config(state="normal")
+            self.text_widget.insert(tk.END, string)
+            self.text_widget.see(tk.END)
+            self.text_widget.config(state="disabled")
+            
+        def flush(self): 
+            pass
 
-    sys.stdout = Redirect()
-    sys.stderr = Redirect()
+    sys.stdout = Redirect(text_widget)
+    sys.stderr = Redirect(text_widget)
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
 # Function to generate dummy data for tables
@@ -431,7 +433,9 @@ def generate_dummy_data(lexemeTree, symbolTree, console):
         "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
         "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
     )
-    update_console(console, sample_really_long_multi_line_text)
+    # update_console(console, sample_really_long_multi_line_text) # No need for this since the standard output is redirected to the console
+    print(sample_really_long_multi_line_text)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════════════
 # Main function to run the GUI (setups the GUI and starts the application)
@@ -570,14 +574,15 @@ def run_gui():
     symbolTooltip = TreeviewTooltip(symbolTree)
     # ═══════════════════════════════════════════════════════════════════════════════════════════════
     # Center view
-    executeButton = tk.Button(centerView, text="Execute", command=lambda: print("Executing..."))
+    executeButton = tk.Button(centerView, text="Execute", 
+                              command=lambda: execute_code(codeEditor, console, lexemeTree, symbolTree))
     executeButton.pack(fill = "both", expand=True, padx=0, pady=(5, 5))
 
     # ═══════════════════════════════════════════════════════════════════════════════════════════════
     # Bottom view
     # This is the console area where output will be displayed
     console = tk.Text(bottomView, state="disabled", wrap="word", 
-                    bg="#f0f0f0", fg="#000000", font=("Courier New", 10),  
+                    bg="#f0f0f0", fg="#000000", font=("Courier New", 15),  
                     padx=10, pady=10, cursor="arrow",
                     borderwidth=0, 
                     highlightthickness=0, 
@@ -588,7 +593,13 @@ def run_gui():
     console.pack(fill="both", expand=True)    
 
     # ───────────────────────────────────────────────────────────────────────────────────────────────
-    generate_dummy_data(lexemeTree, symbolTree, console) # Delete this later
+    # Make sure to redirect Python's standard output to the custom console
+    redirect_python_output_to_custom_console(console)
+
+    # Make sure to update the flag for no GUI mode
+    globals.no_gui = False
+    # ───────────────────────────────────────────────────────────────────────────────────────────────
+    # generate_dummy_data(lexemeTree, symbolTree, console) # For testing purposes
 
     root.mainloop()
 
