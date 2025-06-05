@@ -14,6 +14,7 @@ root = None
 lexemeTree = None
 symbolTree = None
 console = None
+
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 # Class to create a code editor with line numbers, scrollbars, and context menu/right-click options
 class CodeEditor(tk.Frame):
@@ -79,31 +80,31 @@ class CodeEditor(tk.Frame):
         # Bind mouse click outside the context menu (right click menu) to hide it (so it doesn't stay open)
         root.bind('<Button-1>', self.hide_context_menu)
 
+    # Handle vertical scrollbar movement
     def on_scrollbar(self, *args):
-        """Handle vertical scrollbar movement"""
         self.textWidget.yview(*args)
         self.lineNumbers.yview(*args)
     
+    # Handle text widget scrolling
     def on_textscroll(self, *args):
-        """Handle text widget scrolling"""
         self.verticalScrollbar.set(*args)
         self.lineNumbers.yview_moveto(args[0])
     
+    # Handle mouse wheel scrolling
     def on_mousewheel(self, event):
-        """Handle mouse wheel scrolling"""
         self.lineNumbers.yview_scroll(int(-1 * (event.delta / 120)), "units")
     
+    # Handle left click events
     def on_left_click(self, event=None):
-        """Handle left click events"""
         self.hide_context_menu()
         self.after_idle(self.update_line_numbers)
     
+    # Handle content changes
     def on_content_changed(self, event=None):
-        """Handle content changes"""
         self.after_idle(self.update_line_numbers)
     
+    # Update line numbers display
     def update_line_numbers(self):
-        """Update line numbers display"""
         self.lineNumbers.config(state='normal')
         self.lineNumbers.delete('1.0', tk.END)
         
@@ -116,17 +117,16 @@ class CodeEditor(tk.Frame):
         
         self.lineNumbers.config(state='disabled')
 
+    # Show right-click context menu
     def show_context_menu(self, event):
-        """Show right-click context menu"""
         try:
             self.contextMenu.tk_popup(event.x_root, event.y_root)
 
         finally:
             self.contextMenu.grab_release()
 
-        
+    # Hide context menu
     def hide_context_menu(self, event=None):
-        """Hide context menu"""
         try:
             self.contextMenu.unpost()
         except:
@@ -137,16 +137,16 @@ class CodeEditor(tk.Frame):
             return
         return "break"
     
+    # Copy selected text
     def copy_text(self, event=None):
-        """Copy selected text"""
         try:
             self.textWidget.event_generate("<<Copy>>")
         except tk.TclError:
             pass
         return "break"
     
+    # Cut selected text
     def cut_text(self, event=None):
-        """Cut selected text"""
         try:
             self.textWidget.event_generate("<<Cut>>")
             self.update_line_numbers()
@@ -154,8 +154,8 @@ class CodeEditor(tk.Frame):
             pass
         return "break"
     
+    # Paste text from clipboard
     def paste_text(self, event=None):
-        """Paste text"""
         try:
             self.textWidget.event_generate("<<Paste>>")
             self.update_line_numbers()
@@ -163,28 +163,28 @@ class CodeEditor(tk.Frame):
             pass
         return "break"
     
+    # Select all text (keyboard shortcut)
     def select_all(self, event=None):
-        """Select all text (keyboard shortcut)"""
         self.textWidget.tag_add(tk.SEL, "1.0", tk.END)
         self.textWidget.mark_set(tk.INSERT, "1.0")
         self.textWidget.see(tk.INSERT)
         return "break"
     
+    # Select all text (menu command)
     def select_all_menu(self):
-        """Select all text (menu command)"""
         self.select_all()
     
+    # Get text content
     def get(self, start, end=None):
-        """Get text content"""
         return self.textWidget.get(start, end)
     
+    # Insert text
     def insert(self, index, text):
-        """Insert text"""
         self.textWidget.insert(index, text)
         self.update_line_numbers()
     
+    # Delete text
     def delete(self, start, end=None):
-        """Delete text"""
         self.textWidget.delete(start, end)
         self.update_line_numbers()
 
@@ -267,9 +267,9 @@ class TreeviewTooltip:
         
         # Make tooltip visible
         self.tooltip.deiconify()
-        
+    
+    # Update tooltip position to follow cursor within the same cell
     def update_tooltip_position(self, event):
-        """Update tooltip position to follow cursor within the same cell"""
         if self.tooltip:
             # Get tooltip dimensions
             tooltip_height = self.tooltip.winfo_reqheight()
@@ -291,8 +291,8 @@ class TreeviewTooltip:
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
 # Function to choose a file and load its content into the code editor
+# Open a file dialog to choose a LOLCODE file and load its content into the code editor.
 def choose_file(fileChooserButton, codeEditor):
-    """Open a file dialog to choose a LOLCODE file and load its content into the code editor."""
     fileTypes = [
         ("LOLCODE files", "*.lol"),
         ("All files", "*.*"),
@@ -316,11 +316,9 @@ def choose_file(fileChooserButton, codeEditor):
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
 # Function to update the contents of a table (tree) with new data
+# Update the contents of a table (tree) with new data.
+# Data are expected to be a list of tuples, where each tuple represents a row.
 def update_table_contents(table, data):
-    """
-        Update the contents of a table (tree) with new data.
-        Data are expected to be a list of tuples, where each tuple represents a row.
-    """
     # Clear existing data
     for item in table.get_children():
         table.delete(item)
@@ -367,10 +365,9 @@ def get_user_input():
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
 # Function to run when the execute button is clicked
+# Execute the code in the code editor and display the result in the console while also updating 
+# the lexeme and symbol tables.
 def execute_code(codeEditor, console, lexemeTree, symbolTree):
-    """
-    Execute the code in the code editor and display the result in the console while also updating the lexeme and symbol tables.
-    """
     # Get the code from the code editor
     code = codeEditor.get("1.0", "end-1c")  # Get all text, excluding the last newline character
 
@@ -411,7 +408,7 @@ def redirect_python_output_to_custom_console(text_widget):
     sys.stderr = Redirect(text_widget)
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
-# Function to generate dummy data for tables
+# Function to generate dummy data for gui
 def generate_dummy_data(lexemeTree, symbolTree, console):
     sample_data = []
     for i in range(20):
@@ -433,7 +430,6 @@ def generate_dummy_data(lexemeTree, symbolTree, console):
         "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
         "Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
     )
-    # update_console(console, sample_really_long_multi_line_text) # No need for this since the standard output is redirected to the console
     print(sample_really_long_multi_line_text)
 
 
@@ -603,5 +599,6 @@ def run_gui():
 
     root.mainloop()
 
+# ═══════════════════════════════════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
     run_gui()
