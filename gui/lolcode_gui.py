@@ -3,6 +3,7 @@ from tkinter import ttk # For tables
 from tkinter import filedialog # For opening files
 import os
 import tkinter.font as tkfont
+import sys
 
 # Declare important variables in which most functions will operate
 root = None
@@ -10,7 +11,9 @@ lexemeTree = None
 symbolTree = None
 console = None
 
+
 # ═══════════════════════════════════════════════════════════════════════════════════════════════
+# Class to create a code editor with line numbers, scrollbars, and context menu/right-click options
 class CodeEditor(tk.Frame):
     def __init__(self, parent, root, **kwargs):
         super().__init__(parent)
@@ -192,10 +195,10 @@ class TreeviewTooltip:
         self.tooltip = None
         self.current_item = None
         self.current_column = None
-        self.treeview.bind('<Motion>', self._on_motion)
-        self.treeview.bind('<Leave>', self._hide_tooltip)
+        self.treeview.bind('<Motion>', self.on_motion)
+        self.treeview.bind('<Leave>', self.hide_tooltip)
         
-    def _on_motion(self, event):
+    def on_motion(self, event):
         # Get the item and column under the cursor
         item = self.treeview.identify_row(event.y)
         column = self.treeview.identify_column(event.x)
@@ -203,7 +206,7 @@ class TreeviewTooltip:
         # Check if we've moved to a different cell
         if item != self.current_item or column != self.current_column:
             # Hide current tooltip since we've moved to a different cell
-            self._hide_tooltip()
+            self.hide_tooltip()
             
             # Update current position
             self.current_item = item
@@ -228,12 +231,12 @@ class TreeviewTooltip:
                     text_width = font.measure(text)
                     
                     if text_width > col_width - 10:  # (-10) for padding
-                        self._show_tooltip(event, text)
+                        self.show_tooltip(event, text)
         elif self.tooltip:
             # We're in the same cell but cursor moved - update tooltip position
-            self._update_tooltip_position(event)
+            self.update_tooltip_position(event)
     
-    def _show_tooltip(self, event, text):
+    def show_tooltip(self, event, text):
         if self.tooltip:
             self.tooltip.destroy()
             
@@ -263,7 +266,7 @@ class TreeviewTooltip:
         # Make tooltip visible
         self.tooltip.deiconify()
         
-    def _update_tooltip_position(self, event):
+    def update_tooltip_position(self, event):
         """Update tooltip position to follow cursor within the same cell"""
         if self.tooltip:
             # Get tooltip dimensions
@@ -276,7 +279,7 @@ class TreeviewTooltip:
             # Move tooltip to new position
             self.tooltip.wm_geometry(f"+{x_pos}+{y_pos}")
     
-    def _hide_tooltip(self, event=None):
+    def hide_tooltip(self, event=None):
         if self.tooltip:
             self.tooltip.destroy()
             self.tooltip = None
@@ -284,7 +287,7 @@ class TreeviewTooltip:
         self.current_item = None
         self.current_column = None
 
-# ───────────────────────────────────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════════════════════
 # Function to choose a file and load its content into the code editor
 def choose_file(fileChooserButton, codeEditor):
     """Open a file dialog to choose a LOLCODE file and load its content into the code editor."""
@@ -378,6 +381,32 @@ def update_console(console, text):
 
     # Disable editing again
     console.config(state="disabled")    
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────
+# Function to run when the execute button is clicked
+def execute_code(codeEditor, console, lexemeTree, symbolTree):
+    """
+    Execute the code in the code editor and display the result in the console while also updating the lexeme and symbol tables.
+    """
+    # Get the code from the code editor
+    code = codeEditor.get("1.0", "end-1c")  # Get all text, excluding the last newline character
+
+    # Clear the console before executing new code
+    console.delete("1.0", "end")
+
+    # Run the LOLCODE interpreter
+
+# ───────────────────────────────────────────────────────────────────────────────────────────────
+# Function to redirect everything printed in Python console to a custome console (text widget)
+def redirect_python_output_to_custom_console(text_widget):
+    class Redirect:
+        def write(self, string):
+            text_widget.insert(tk.END, string)
+            text_widget.see(tk.END)
+        def flush(self): pass
+
+    sys.stdout = Redirect()
+    sys.stderr = Redirect()
 
 # ───────────────────────────────────────────────────────────────────────────────────────────────
 # Function to generate dummy data for tables
