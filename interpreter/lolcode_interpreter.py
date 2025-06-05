@@ -443,8 +443,9 @@ class Interpreter:
         user_input_value = str(input())
         user_input_value = " " + user_input_value + " "
       else:
-        user_input_value = " " + get_user_input() + " "
+        user_input_value = get_user_input()
         print(user_input_value)
+        user_input_value = " " + user_input_value + " "
 
       user_input = StringNode((user_input_value, None, variable.var_name_token[TOKEN_LINE_NUMBER]))
 
