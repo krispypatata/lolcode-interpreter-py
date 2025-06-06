@@ -1,4 +1,5 @@
 # lolcode-python-py
+By Keith Ginoel Gabinete, 2025
 
 ## OVERVIEW
 <p align="justify">
@@ -298,6 +299,89 @@ For detailed information on the original LOLCODE specifications, please refer to
 | `WIN`, `FAIL`         | TROOF (Boolean)      |
 | `NOOB`                | NULL                 |
 | `NUMBR`, `NUMBAR`, `YARN`, `TROOF` | LITERAL_TYPE |
+
+
+## GUI Features
+Employs a dark theme for better visual comfort.
+
+### Layout Overview
+
+**Window (1280 × 720, default on launch)**  
+![Default Window Screenshot](screenshots/01_window-default.png)
+
+**Window (maximized)**  
+![Maximized Window Screenshot](screenshots/01_window-maximized.png)
+
+
+#### Top Left Panel: Code Editor View
+
+1. **File Chooser Button**
+
+   * Allows users to open a file with a `.lol` extension.
+   * The contents of the selected file are immediately displayed in the code editor.
+
+2. **Code Editor**
+
+   * Displays LOLCODE files.
+   * Code is editable.
+   * Line numbers are displayed and update automatically when new lines are added.
+   * Line numbers adjust in real time based on the scrollbar view.
+   * Horizontal scrollbars appear if the code line exceeds the editor’s width.
+   * Context menu on right-click with the following options:
+
+     * Copy
+     * Cut
+     * Paste
+     * Select All
+   * Keyboard shortcuts supported for these actions.
+
+**Screenshots:**  
+*![Code Editor Screenshot](screenshots/02_editor.png)*  
+*![Code Editor's File Chooser Screenshot](screenshots/02_editor-file-chooser.png)*
+
+
+#### Top Right Panel: Table Views
+
+1. **Lexeme Table**
+
+   * Displays: Lexeme | Classification | Line #
+
+2. **Symbol Table**
+
+   * Displays: Symbol | Value
+
+> **Note:** If content exceeds the column width, a tooltip appears showing the full content of the cell.
+
+**Screenshot:**  
+*![Table Views Screenshot](screenshots/03_table-views.png)*
+
+
+
+#### Center: Execute Button
+
+* Executes the LOLCODE displayed in the code editor.
+
+**Screenshot:**  
+*![Execute Button Screenshot](screenshots/04_execute.png)*
+
+
+
+#### Bottom Panel: Console/Terminal
+
+* Displays output from the interpreter.
+* **Extra Feature:** Right-clicking a selected text copies it to the clipboard.
+
+**Screenshot:**  
+*![Console Screenshot](screenshots/05_console.png)*
+
+
+
+### Modal: User Input
+
+* A pop-up modal (non-resizable) appears when input is required.
+
+**Screenshot:**  
+*![Input Modal Screenshot](screenshots/06_get-input.png)*
 
 
 
