@@ -226,3 +226,78 @@ For detailed information on the original LOLCODE specifications, please refer to
 
 * Expressions (or arguments) are evaluated first before the function executes.
 
+
+
+## Lexemes & Literals Summary  
+### Lexemes Table
+
+| **Lexeme**           | **Tag Description**                    |
+|----------------------|----------------------------------------|
+| `HAI`                | Program Start Delimiter                |
+| `KTHXBYE`            | Program End Delimiter                  |
+| `WAZZUP`             | Variable Declaration Start Delimiter   |
+| `BUHBYE`             | Variable Declaration End Delimiter     |
+| `I HAS A`            | Variable Declaration                   |
+| `ITZ`                | Variable Initialization                |
+| `R`                  | Assignment Keyword                     |
+| `SUM OF`             | Addition Operator                      |
+| `DIFF OF`            | Subtraction Operator                   |
+| `PRODUKT OF`         | Multiplication Operator                |
+| `QUOSHUNT OF`        | Division Operator                      |
+| `MOD OF`             | Modulus Operator                       |
+| `BIGGR OF`           | Greater Than Operator                  |
+| `SMALLR OF`          | Less Than Operator                     |
+| `BOTH OF`            | AND Operator                           |
+| `EITHER OF`          | OR Operator                            |
+| `WON OF`             | XOR Operator                           |
+| `NOT`                | NOT Operator                           |
+| `ANY OF`             | ANY Operator                           |
+| `ALL OF`             | ALL Operator                           |
+| `BOTH SAEM`          | Equality Operator                      |
+| `DIFFRINT`           | Inequality Operator                    |
+| `SMOOSH`             | String Concatenate Operator            |
+| `MAEK A`             | Typecast Operator                      |
+| `IS NOW A`           | Typecast IS NOW A Operator             |
+| `AN`                 | Operand Connector                      |
+| `YR`                 | Parameter Variable                     |
+| `AN YR`              | Additional Parameter Variable          |
+| `VISIBLE`            | Print Statement                        |
+| `+`                  | Print Statement Delimiter              |
+| `GIMMEH`             | Input Statement                        |
+| `O RLY?`             | Conditional Start Delimiter            |
+| `YA RLY`             | If Clause                              |
+| `MEBBE`              | Else-If Clause                         |
+| `NO WAI`             | Else Clause                            |
+| `OIC`                | Conditional End Delimiter              |
+| `WTF?`               | Switch-Case Start Delimiter            |
+| `OMG`                | Case Clause                            |
+| `OMGWTF`             | Switch-Case End Delimiter              |
+| `IM IN YR`           | Loop Start Delimiter                   |
+| `UPPIN`              | Increment Operator                     |
+| `NERFIN`             | Decrement Operator                     |
+| `TIL`                | Until Loop                             |
+| `WILE`               | While Loop                             |
+| `IM OUTTA YR`        | Loop End Delimiter                     |
+| `HOW IZ I`           | Function Start Delimiter               |
+| `IF U SAY SO`        | Function End Delimiter                 |
+| `GTFO`               | Function Return                        |
+| `FOUND YR`           | Function Return Value                  |
+| `I IZ`               | Function Call                          |
+| `MKAY`               | Statement End Delimiter                |
+| Identifier (e.g. `var1`) | Identifier                        |
+| *EOF (implicit)*     | End of File                            |
+
+
+### Literal Table
+
+| **Literal Example**   | **Tag Description**  |
+|-----------------------|----------------------|
+| `42`                  | NUMBR (Integer)      |
+| `3.14`                | NUMBAR (Float)       |
+| `"Hello"`             | YARN (String)        |
+| `WIN`, `FAIL`         | TROOF (Boolean)      |
+| `NOOB`                | NULL                 |
+| `NUMBR`, `NUMBAR`, `YARN`, `TROOF` | LITERAL_TYPE |
+
+
+
