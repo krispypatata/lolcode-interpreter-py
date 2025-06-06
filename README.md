@@ -1,4 +1,4 @@
-# lolcode-python-py
+# lolcode-interpreter-py
 By Keith Ginoel Gabinete, 2025
 
 ## OVERVIEW
