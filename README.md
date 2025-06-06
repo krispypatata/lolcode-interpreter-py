@@ -32,3 +32,197 @@ Originally, this was a group project (team of two) at the author’s university.
    - You can modify the `test_run_lolcode` function as needed for testing.  
    - Alternatively, you can also use the `handle_run_lolcode()` function.
 
+## Interpreter Features
+This section outlines the features that are implemented or not yet implemented in this version of the LOLCODE interpreter.
+For detailed information on the original LOLCODE specifications, please refer to the [official LOLCODE spec](https://github.com/justinmeza/lolcode-spec/tree/master).
+
+### 1. File Structure and Formatting
+
+* **File Extension**: `.lol`
+* **Program Start**: `HAI`
+* **Program End**: `KTHXBYE`
+* **Comments**:
+
+  * Single-line: Start with `BTW`
+  * Multi-line: Enclosed between `OBTW` and `TLDR`
+* **Statement Rules**:
+
+  * One statement per line
+  * No support for comma-separated statements
+  * Indentation and extra spaces are ignored
+* **Function Definitions**: Must be within `HAI` and `KTHXBYE`
+
+### 2. Variables
+
+* **Declaration Block**: Between `WAZZUP` and `BUHBYE`
+* **Declaration Syntax**: `I HAS A <variable>`
+* **Initialization**: Optional, using `ITZ`
+* **Naming Rules**:
+
+  * Start with a letter
+  * Can include letters, numbers, and underscores
+  * No spaces or special characters
+* **Dynamic Typing**: Variables can change types during execution (just like in python)
+* **Implicit Variable**: `IT` holds the result of the last evaluated expression
+    
+*Note*: For VISIBLE (print) statements (for example, `VISIBLE 2 + " - " + 3 + " = " + DIFF OF 2 AN 3`), the result will be stored in `IT` as the full output string (`2 - 3 = -1`).
+
+### 3. Data Types
+
+* **NOOB**: Uninitialized variable
+* **NUMBR**: Integer (e.g., `42`)
+* **NUMBAR**: Floating-point number (e.g., `3.14`)
+* **YARN**: String enclosed in double quotes (e.g., `"hello"`)
+* **TROOF**: Boolean values `WIN` (true) or `FAIL` (false)
+
+### 4. Input and Output
+
+* **Output**: `VISIBLE` prints to the console
+
+  * Supports multiple arguments separated by `AN` or `+`
+  * Automatically adds a newline after output
+* **Input**: `GIMMEH <variable>` reads input as a string and assigns it to the variable
+
+### 5. Operations
+
+#### 5.1 Arithmetic Operations
+
+* **Addition**: `SUM OF <a> AN <b>`
+* **Subtraction**: `DIFF OF <a> AN <b>`
+* **Multiplication**: `PRODUKT OF <a> AN <b>`
+* **Division**: `QUOSHUNT OF <a> AN <b>`
+* **Modulo**: `MOD OF <a> AN <b>`
+* **Maximum**: `BIGGR OF <a> AN <b>`
+* **Minimum**: `SMALLR OF <a> AN <b>`
+
+*Note*: Operands are automatically typecasted to `NUMBR` or `NUMBAR` as needed.
+
+#### 5.2 String Concatenation
+
+* **Concatenation**: `SMOOSH <a> AN <b> AN ...`
+  * Can also use `+` as a separator
+  * Converts all operands to strings before concatenation
+
+#### 5.3 Boolean Operations
+
+* **AND**: `BOTH OF <a> AN <b>`
+* **OR**: `EITHER OF <a> AN <b>`
+* **XOR**: `WON OF <a> AN <b>`
+* **NOT**: `NOT <a>`
+* **ALL OF**: `ALL OF <a> AN <b> AN ... MKAY`
+* **ANY OF**: `ANY OF <a> AN <b> AN ... MKAY`
+
+*Note*: Non-boolean operands are implicitly cast to `TROOF`.
+
+#### 5.4 Comparison Operations
+
+* **Equal**: `BOTH SAEM <a> AN <b>`
+* **Not Equal**: `DIFFRINT <a> AN <b>`
+* **Greater Than or Equal**: `BOTH SAEM <a> AN BIGGR OF <a> AN <b>`
+* **Less Than or Equal**: `BOTH SAEM <a> AN SMALLR OF <a> AN <b>`
+* **Greater Than**: `DIFFRINT <a> AN SMALLR OF <a> AN <b>`
+* **Less Than**: `DIFFRINT <a> AN BIGGR OF <a> AN <b>`
+
+*Note*: No automatic typecasting; operands must be of comparable types.
+
+### 6. Typecasting
+
+* **Implicit Casting**:
+
+  * `NOOB` to `TROOF`: `FAIL`
+  * `TROOF` to `NUMBR`: `WIN` → `1`, `FAIL` → `0`
+  * `NUMBAR` to `NUMBR`: Truncates decimal
+  * `NUMBR` to `NUMBAR`: Converts to float
+* **Explicit Casting**:
+
+  * `MAEK <value> A <type>`: Casts value to specified type
+  * `IS NOW A`: Changes the type of a variable
+
+### 7. Statements
+
+#### 7.1 Expression Statements
+
+* Evaluating an expression without assignment stores the result in `IT`
+
+#### 7.2 Assignment Statements
+
+* Syntax: `<variable> R <expression>`
+
+#### 7.3 Conditional Statements
+
+* **Structure**:
+
+  ```
+  <expression>
+  O RLY?
+    YA RLY
+      <code block>
+    NO WAI
+      <code block>
+  OIC
+  ```
+* Executes `YA RLY` block if `IT` is `WIN`; otherwise, executes `NO WAI` block
+* `MEBBE` (else-if) clauses are **not yet implemented**
+
+#### 7.4 Switch-Case Statements
+
+* **Structure**:
+
+  ```
+  WTF?
+    OMG <value>
+      <code block>
+    OMGWTF
+      <default code block>
+  OIC
+  ```
+* Compares `IT` to each `OMG` value; executes matching block
+* `OMGWTF` is the default case
+* Use `GTFO` to exit a case block
+
+#### 7.5 Loops
+
+* **Structure**:
+
+  ```
+  IM IN YR <label> <operation> YR <variable> [TIL|WILE <condition>]
+    <code block>
+  IM OUTTA YR <label>
+  ```
+* `<operation>`: `UPPIN` (increment) or `NERFIN` (decrement)
+* `TIL <condition>`: Loop until condition is `WIN`
+* `WILE <condition>`: Loop while condition is `WIN`
+* Use `GTFO` to break out of the loop
+
+### 8. Functions
+
+#### 8.1 Definition
+
+* **Structure**:
+
+  ```
+  HOW IZ I <function name> [YR <param1> [AN YR <param2> ...]]
+    <code block>
+  IF U SAY SO
+  ```
+* Fixed number of parameters
+* Parameters are local to the function
+* No access to variables outside the function scope
+
+#### 8.2 Returning Values
+
+* `FOUND YR <expression>`: Returns the value of the expression and exits the function
+* `GTFO`: Exits the function immediately without returning a value
+* If no `FOUND` is executed, the function returns `NOOB` by default
+* The returned value is stored in `IT`
+
+#### 8.3 Calling Functions
+
+* Call functions using:
+
+  ```
+  I IZ <function name> [YR <expression1> [AN YR <expression2> ...]] MKAY
+  ```
+
+* Expressions (or arguments) are evaluated first before the function executes.
+
