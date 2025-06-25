@@ -3,12 +3,14 @@ By Keith Ginoel Gabinete, 2025
 
 ## OVERVIEW
 <p align="justify">
-This is a LOLCODE interpreter built using Python and Tkinter (for the GUI). It is based on the specifications from http://www.lolcode.org/. While the features may not exactly match the original, this project aims to closely mimic its behavior. The author’s purpose in building this project is to create a simple programming language from scratch and to understand the phases of lexer, parser, and interpreter.
+This is a LOLCODE interpreter built using Python and tkinter (for the GUI). It is based on the specifications from http://www.lolcode.org/. While the features may not exactly match the original, this project aims to closely mimic its behavior. The author’s purpose in building this project is to create a simple programming language from scratch and to understand the phases of lexer, parser, and interpreter.
 </p>
 
 ### Author’s Note:
 <p align="justify">
-Originally, this was a group project (team of two) at the author’s university. Although the team submitted a satisfactory version, the author decided to revive this project to improve it by fixing bugs and adding new features. While it started as a group project, it is worth noting that the code retrieved from the original repository includes only the work done by the author. As a result, this has become author's solo project.
+Originally, this was a group project at the author’s university. Although the team submitted a satisfactory version, the author decided to revive this project to improve it by fixing bugs and adding new features. While it started as a group project, it is worth noting that the code retrieved from the original repository includes only the work done by the author. In other words, contributions from other team members were not transferred to this repository. 
+<br/><br/>
+<b>tl;dr</b>: This is a solo project.
 </p>
 
 ## Prerequisites
